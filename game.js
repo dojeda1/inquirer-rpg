@@ -16,6 +16,12 @@ function dropGold() {
     console.log(currentEnemy.name + " dropped " + amount + " gold")
 }
 
+function runGoldLoss() {
+    var amount = randNum(0, Math.floor(player.gold / 2));
+    player.gold -= amount;
+    console.log("You lost " + amount + " gold.")
+}
+
 dropGold
 // character creators
 function CreateCharacter(name, race, profession) {
@@ -69,7 +75,7 @@ function CreateCharacter(name, race, profession) {
 
     this.gainXp = function (opponent) {
         this.xp += opponent.xp;
-        console.log("You gained " + opponent.xp + " XP");
+        console.log("You gained " + opponent.xp + " XP.");
         console.log("Total XP: " + this.xp);
     }
 
@@ -102,7 +108,7 @@ function CreateMonster(name, strength, maxHp, maxMp, xp, gold) {
     this.attack = function (opponent) {
         opponent.hp -= this.strength;
         console.log(this.name + " attacked you for " + this.strength + " damage.")
-        console.log(opponent.name + " has " + opponent.hp + " HP left.")
+        console.log("You have " + opponent.hp + " HP left.")
 
 
     }
@@ -152,12 +158,42 @@ function gameStart() {
 
             // testing area
             player.checkStats();
-            monsterEncounter();
+            whereTo();
         });
 }
 
+function whereTo() {
+    inquirer.prompt({
+            type: "list",
+            message: "Where to next?",
+            name: "action",
+            choices: ["Next battle", "Go to town", "Check stats", "Quit"]
+        })
+        .then(function (choice) {
+            switch (choice.action) {
+
+                case "Next battle":
+                    monsterEncounter();
+                    break;
+
+                case "Go to town":
+                    console.log("You went to town.")
+                    break;
+
+                case "Check stats":
+                    player.checkStats();
+                    whereTo();
+                    break;
+
+                case "Quit":
+                    console.log("Good bye " + player.name + ".");
+                    break;
+            }
+        })
+}
+
 function monsterEncounter() {
-    var monNum = randNum(0, monsters.length)
+    var monNum = randNum(0, player.level)
     currentEnemy = monsters[monNum];
 
     console.log("\nYou encountered a " + currentEnemy.name + ".\n")
@@ -171,21 +207,24 @@ function fight() {
             type: "list",
             message: "What next?",
             name: "action",
-            choices: ["Fight", "Check Stats", "Run"]
+            choices: ["Attack", "Check stats", "Run"]
         })
         .then(function (choice) {
             switch (choice.action) {
-                case "Fight":
+                case "Attack":
                     console.log("\n--------")
                     player.attack(currentEnemy);
                     if (currentEnemy.hp <= 0) {
-                        console.log("You killed " + currentEnemy.name);
+                        console.log("You killed " + currentEnemy.name + ".");
+                        console.log("--------\n");
                         dropGold();
                         player.gainXp(currentEnemy);
                         player.levelUp();
-                        console.log("--------\n")
+                        currentEnemy.hp = currentEnemy.maxHp;
+                        currentEnemy.mp = currentEnemy.maxMp;
+                        console.log("--------\n");
 
-                        monsterEncounter();
+                        whereTo();
 
                     } else {
                         currentEnemy.attack(player);
@@ -193,7 +232,7 @@ function fight() {
 
                         if (player.hp <= 0) {
 
-                            console.log(currentEnemy.name + " has Killed you");
+                            console.log(currentEnemy.name + " has Killed you.");
                             console.log(" -- GAME OVER -- ");
                             console.log("--------\n")
                         } else {
@@ -203,14 +242,19 @@ function fight() {
                     }
                     break;
 
-                case "Check Stats":
+                case "Check stats":
                     player.checkStats();
                     fight();
                     break;
 
                 case "Run":
-                    console.log("You Ran Away")
-                    // exitGame();
+
+                    console.log("\n--------")
+                    console.log("You Ran Away.")
+                    runGoldLoss();
+                    console.log("--------\n")
+                    whereTo();
+
                     break;
             }
         })
