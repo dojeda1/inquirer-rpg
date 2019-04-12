@@ -19,8 +19,8 @@ function dropGold() {
 dropGold
 // character creators
 function CreateCharacter(name, race, profession) {
-
-    this.name = nameStructure(name)
+    // nameStructure(name)
+    this.name = "Thomas"
     this.race = race;
     this.profession = profession;
     this.strength = 5;
@@ -111,10 +111,17 @@ function CreateMonster(name, strength, maxHp, maxMp, xp, gold) {
 
 // create monsters
 var currentEnemy = {};
+monsters = []
 //                            name, strength, maxHp, maxMp, xp, gold
 var slime = new CreateMonster("Slime", 2, 10, 0, 10, 10);
+monsters.push(slime);
 var goblin = new CreateMonster("Goblin", 5, 15, 0, 15, 15);
-var orc = new CreateMonster("Slime", 2, 10, 0, 10, 10);
+monsters.push(goblin);
+var orc = new CreateMonster("Orc", 8, 20, 0, 20, 20);
+monsters.push(orc);
+
+// console.log(monsters)
+console.log("Monster: " + monsters.length)
 
 function gameStart() {
     inquirer
@@ -144,11 +151,19 @@ function gameStart() {
             player = new CreateCharacter(newPlayer.name, newPlayer.race, newPlayer.profession);
 
             // testing area
-            currentEnemy = slime
             player.checkStats();
-
-            fight();
+            monsterEncounter();
         });
+}
+
+function monsterEncounter() {
+    var monNum = randNum(0, monsters.length)
+    currentEnemy = monsters[monNum];
+
+    console.log("\nYou encountered a " + currentEnemy.name + ".\n")
+
+    fight();
+
 }
 
 function fight() {
@@ -170,12 +185,7 @@ function fight() {
                         player.levelUp();
                         console.log("--------\n")
 
-                        currentEnemy = goblin;
-                        currentEnemy.hp = currentEnemy.maxHp
-                        currentEnemy.mp = currentEnemy.maxMp
-                        // currentEnemy.checkStats();
-
-                        fight();
+                        monsterEncounter();
 
                     } else {
                         currentEnemy.attack(player);
