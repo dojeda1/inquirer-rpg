@@ -6,6 +6,18 @@ function nameStructure(roughName) {
     return newName;
 }
 
+function randNum(x, y) {
+    return Math.floor(Math.random() * y) + x
+}
+
+function dropGold() {
+    var amount = randNum(0, currentEnemy.gold);
+    player.gold += amount;
+    console.log(currentEnemy.name + " dropped " + amount + " gold")
+}
+
+dropGold
+// character creators
 function CreateCharacter(name, race, profession) {
 
     this.name = nameStructure(name)
@@ -19,7 +31,7 @@ function CreateCharacter(name, race, profession) {
     this.level = 1;
     this.xp = 0;
     this.nextLevel = 20;
-    this.inventory = ["sword", "hat"];
+    this.inventory = ["potion", "hat"];
     this.gold = 0;
     this.isDead = false;
 
@@ -28,23 +40,24 @@ function CreateCharacter(name, race, profession) {
         console.log("\n");
         console.log(" -- " + this.name + " -- ");
         console.log("lv." + this.level + " " + this.race + " " + this.profession);
-        console.log("Strength: " + this.strength + ", Hp: " + this.hp + "/" + this.maxHp + ", MP: " + this.mp + "/" + this.maxMp);
-        console.log("XP: " + this.xp + ", to next level: " + (this.nextLevel - this.xp));
+        console.log("Hp: " + this.hp + "/" + this.maxHp + "  |  MP: " + this.mp + "/" + this.maxMp + "  |  Strength: " + this.strength);
+        console.log("XP: " + this.xp + " | to next level: " + (this.nextLevel - this.xp));
         console.log("Gold: " + this.gold);
-        console.log("Inventory: " + this.inventory);
+        console.log(" -- Inventory -- ");
+        console.log(this.inventory);
         console.log("\n");
     }
 
     this.attack = function (opponent) {
         opponent.hp -= this.strength;
-        console.log(this.name + " attacked " + opponent.name + " for " + this.strength + " damage.")
+        console.log("You attacked " + opponent.name + " for " + this.strength + " damage.")
         console.log(opponent.name + " has " + opponent.hp + " HP left.")
     }
 
     this.levelUp = function () {
         if (this.xp >= this.nextLevel) {
             this.level++;
-            this.nextLevel = (this.nextLevel + (this.nextLevel * 1.5));
+            this.nextLevel = ((this.nextLevel * 2) + (this.level * 10));
             this.strength += 2;
             this.maxHp += 5;
             this.hp = this.maxHp;
@@ -62,33 +75,33 @@ function CreateCharacter(name, race, profession) {
 
 };
 
-function CreateMonster(name, strength, hp, mp, xp) {
+function CreateMonster(name, strength, maxHp, maxMp, xp, gold) {
 
     this.name = name
     this.strength = strength;
-    this.maxHp = 10;
-    this.hp = 10;
-    this.maxMp = 10;
-    this.mp = 10;
+    this.maxHp = maxHp;
+    this.hp = maxHp;
+    this.maxMp = maxMp;
+    this.mp = maxMp;
     this.xp = xp;
     this.inventory = [];
-    this.gold = 0
+    this.gold = gold;
     this.isDead = false;
 
     this.checkStats = function () {
 
         console.log("\n");
         console.log(" -- " + this.name + " -- ");
-        console.log("Strength: " + this.strength + ", Hp: " + this.hp + "/" + this.maxHp + ", MP: " + this.mp + "/" + this.maxMp);
+        console.log("Hp: " + this.hp + "/" + this.maxHp + "  |  MP: " + this.mp + "/" + this.maxMp + "  |  Strength: " + this.strength);
         console.log("XP: " + this.xp);
-        console.log("Gold: " + this.gold);
-        console.log("Inventory: " + this.inventory);
+        console.log(" -- Inventory -- ");
+        console.log(this.inventory);
         console.log("\n");
     }
 
     this.attack = function (opponent) {
         opponent.hp -= this.strength;
-        console.log(this.name + " attacked " + opponent.name + " for " + this.strength + " damage.")
+        console.log(this.name + " attacked you for " + this.strength + " damage.")
         console.log(opponent.name + " has " + opponent.hp + " HP left.")
 
 
@@ -98,7 +111,10 @@ function CreateMonster(name, strength, hp, mp, xp) {
 
 // create monsters
 var currentEnemy = {};
-var goblin = new CreateMonster("Goblin", 2, 10, 0, 10);
+//                            name, strength, maxHp, maxMp, xp, gold
+var slime = new CreateMonster("Slime", 2, 10, 0, 10, 10);
+var goblin = new CreateMonster("Goblin", 5, 15, 0, 15, 15);
+var orc = new CreateMonster("Slime", 2, 10, 0, 10, 10);
 
 function gameStart() {
     inquirer
@@ -128,7 +144,7 @@ function gameStart() {
             player = new CreateCharacter(newPlayer.name, newPlayer.race, newPlayer.profession);
 
             // testing area
-            currentEnemy = goblin
+            currentEnemy = slime
             player.checkStats();
 
             fight();
@@ -149,11 +165,16 @@ function fight() {
                     player.attack(currentEnemy);
                     if (currentEnemy.hp <= 0) {
                         console.log("You killed " + currentEnemy.name);
+                        dropGold();
                         player.gainXp(currentEnemy);
                         player.levelUp();
                         console.log("--------\n")
 
                         currentEnemy = goblin;
+                        currentEnemy.hp = currentEnemy.maxHp
+                        currentEnemy.mp = currentEnemy.maxMp
+                        // currentEnemy.checkStats();
+
                         fight();
 
                     } else {
@@ -162,8 +183,8 @@ function fight() {
 
                         if (player.hp <= 0) {
 
-                            console.log(currentEnemy.name + "Has Killed you");
-                            console.log(" -- Game Over -- ");
+                            console.log(currentEnemy.name + " has Killed you");
+                            console.log(" -- GAME OVER -- ");
                             console.log("--------\n")
                         } else {
                             fight();
@@ -184,5 +205,7 @@ function fight() {
             }
         })
 }
+
+
 
 gameStart();
