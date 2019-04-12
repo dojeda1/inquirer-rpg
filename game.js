@@ -1,8 +1,13 @@
 var inquirer = require("inquirer");
 
 function nameStructure(roughName) {
-    var newName = roughName.trim();
-    newName = newName.charAt(0).toUpperCase() + newName.slice(1);
+    if (roughName != "") {
+        var newName = roughName.trim();
+        newName = newName.charAt(0).toUpperCase() + newName.slice(1);
+
+    } else {
+        var newName = "Thomas"
+    }
     return newName;
 }
 
@@ -16,17 +21,21 @@ function dropGold() {
     console.log(currentEnemy.name + " dropped " + amount + " gold.")
 }
 
-function runGoldLoss() {
+function runLoss() {
     var amount = randNum(0, Math.floor(player.gold / 2));
     player.gold -= amount;
     console.log("You lost " + amount + " gold.")
+
+    var loseHealth = randNum(0, 3)
+    player.hp -= loseHealth
+    console.log("You lost " + loseHealth + " HP.")
+
 }
 
-dropGold
 // character creators
 function CreateCharacter(name, race, profession) {
-    // nameStructure(name)
-    this.name = "Thomas"
+
+    this.name = nameStructure(name)
     this.race = race;
     this.profession = profession;
     this.strength = 5;
@@ -39,6 +48,7 @@ function CreateCharacter(name, race, profession) {
     this.nextLevel = 20;
     this.inventory = ["potion", "hat"];
     this.gold = 0;
+    this.killCount = 0;
     this.isDead = false;
 
     this.checkStats = function () {
@@ -125,6 +135,10 @@ var goblin = new CreateMonster("Goblin", 5, 15, 0, 15, 15);
 monsters.push(goblin);
 var orc = new CreateMonster("Orc", 8, 20, 0, 20, 20);
 monsters.push(orc);
+var demon = new CreateMonster("Demon", 12, 30, 10, 30, 30);
+monsters.push(demon);
+var dragon = new CreateMonster("Dragon", 16, 40, 10, 40, 40);
+monsters.push(dragon);
 
 // console.log(monsters)
 console.log("Monster: " + monsters.length)
@@ -197,7 +211,8 @@ function monsterEncounter() {
     var monNum = randNum(0, player.level)
     currentEnemy = monsters[monNum];
 
-    console.log("\nYou encountered a " + currentEnemy.name + ".\n")
+    console.log("\nYou encountered a " + currentEnemy.name + ".")
+    console.log("Hp: " + currentEnemy.hp + "/" + currentEnemy.maxHp + "  |  MP: " + currentEnemy.mp + "/" + currentEnemy.maxMp + "  |  Strength: " + currentEnemy.strength + "\n");
 
     fight();
 
@@ -217,6 +232,7 @@ function fight() {
                     player.attack(currentEnemy);
                     if (currentEnemy.hp <= 0) {
                         console.log("You killed " + currentEnemy.name + ".\n");
+                        player.killCount++;
                         dropGold();
                         player.gainXp(currentEnemy);
                         player.levelUp();
@@ -232,7 +248,10 @@ function fight() {
 
                         if (player.hp <= 0) {
 
-                            console.log(currentEnemy.name + " has Killed you.");
+                            console.log("\n--------")
+                            console.log(currentEnemy.name + " has Killed you.\n");
+                            console.log(player.name + " reached lv." + player.level);
+                            console.log("and killed " + player.killCount + " monsters.\n")
                             console.log(" -- GAME OVER -- ");
                             console.log("--------\n")
                         } else {
@@ -256,9 +275,19 @@ function fight() {
 
                     console.log("\n--------")
                     console.log("You Ran Away.")
-                    runGoldLoss();
+                    runLoss();
                     console.log("--------\n")
-                    whereTo();
+                    if (player.hp <= 0) {
+
+                        console.log("\n--------")
+                        console.log(currentEnemy.name + " has Killed you.\n");
+                        console.log(player.name + " reached lv." + player.level);
+                        console.log("and killed " + player.killCount + " monsters.\n")
+                        console.log(" -- GAME OVER -- ");
+                        console.log("--------\n")
+                    } else {
+                        whereTo()
+                    }
 
                     break;
             }
@@ -279,7 +308,8 @@ function goToTown() {
                     break;
 
                 case "Go to shop":
-                    dogMode();
+                    console.log("You visited the shop. Nothing looks good")
+                    goToTown();
                     break;
 
                 case "Check stats":
@@ -294,10 +324,10 @@ function goToTown() {
         })
 }
 
-gameStart();
+
 
 function stayAtInn() {
-    var cost = 10;
+    var cost = 10 + (player.level - 1) * 2;
     console.log("Staying the night will cost " + cost + " gold.")
     inquirer.prompt({
             type: "confirm",
@@ -314,6 +344,7 @@ function stayAtInn() {
                     console.log("\nYou feel well rested.\n")
                     goToTown();
                 } else {
+                    console.log("\nYou left.\n")
                     goToTown();
                 }
             } else {
@@ -323,3 +354,5 @@ function stayAtInn() {
             }
         });
 }
+
+gameStart();
