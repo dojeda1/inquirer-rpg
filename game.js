@@ -13,7 +13,7 @@ function randNum(x, y) {
 function dropGold() {
     var amount = randNum(0, currentEnemy.gold);
     player.gold += amount;
-    console.log(currentEnemy.name + " dropped " + amount + " gold")
+    console.log(currentEnemy.name + " dropped " + amount + " gold.")
 }
 
 function runGoldLoss() {
@@ -69,7 +69,7 @@ function CreateCharacter(name, race, profession) {
             this.hp = this.maxHp;
             this.maxMp += 4;
             this.mp = this.maxMp;
-            console.log("You are now lv." + this.level + "!!!")
+            console.log("\nYou are now lv." + this.level + "!!!")
         }
     }
 
@@ -177,7 +177,8 @@ function whereTo() {
                     break;
 
                 case "Go to town":
-                    console.log("You went to town.")
+                    console.log("\nYou went to town.\n")
+                    goToTown();
                     break;
 
                 case "Check stats":
@@ -207,7 +208,7 @@ function fight() {
             type: "list",
             message: "What next?",
             name: "action",
-            choices: ["Attack", "Check stats", "Run"]
+            choices: ["Attack", "Use item", "Check stats", "Run"]
         })
         .then(function (choice) {
             switch (choice.action) {
@@ -215,8 +216,7 @@ function fight() {
                     console.log("\n--------")
                     player.attack(currentEnemy);
                     if (currentEnemy.hp <= 0) {
-                        console.log("You killed " + currentEnemy.name + ".");
-                        console.log("--------\n");
+                        console.log("You killed " + currentEnemy.name + ".\n");
                         dropGold();
                         player.gainXp(currentEnemy);
                         player.levelUp();
@@ -242,6 +242,11 @@ function fight() {
                     }
                     break;
 
+                case "Use item":
+                    console.log("You used an Item.")
+                    fight();
+                    break;
+
                 case "Check stats":
                     player.checkStats();
                     fight();
@@ -260,6 +265,61 @@ function fight() {
         })
 }
 
+function goToTown() {
+    inquirer.prompt({
+            type: "list",
+            message: "What next?",
+            name: "action",
+            choices: ["Stay at Inn", "Go to shop", "Check stats", "Leave town"]
+        })
+        .then(function (choice) {
+            switch (choice.action) {
+                case "Stay at Inn":
+                    stayAtInn();
+                    break;
 
+                case "Go to shop":
+                    dogMode();
+                    break;
+
+                case "Check stats":
+                    player.checkStats();
+                    goToTown();
+                    break;
+
+                case "Leave town":
+                    whereTo();
+                    break;
+            };
+        })
+}
 
 gameStart();
+
+function stayAtInn() {
+    var cost = 10;
+    console.log("Staying the night will cost " + cost + " gold.")
+    inquirer.prompt({
+            type: "confirm",
+            name: "isStaying",
+            message: "Is that okay?",
+            default: true
+        })
+        .then(function (choice) {
+            if (player.gold >= cost) {
+                if (choice.isStaying === true) {
+                    player.gold -= cost;
+                    player.hp = player.maxHp;
+                    player.mp = player.maxMp;
+                    console.log("\nYou feel well rested.\n")
+                    goToTown();
+                } else {
+                    goToTown();
+                }
+            } else {
+                console.log("\nYou cannot afford to stay here.\n")
+                goToTown();
+
+            }
+        });
+}
