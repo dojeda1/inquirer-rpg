@@ -1,5 +1,11 @@
 var inquirer = require("inquirer");
 
+// gameplay stage variables
+var isInTown = false;
+var isExploring = true;
+var isFighting = false;
+console.log("f-" + isFighting + " e-" + isExploring + " t-" + isInTown);
+
 function nameStructure(roughName) {
     if (roughName != "") {
         var newName = roughName.trim();
@@ -45,7 +51,7 @@ function CreateCharacter(name, race, profession) {
     this.mp = 10;
     this.level = 1;
     this.xp = 0;
-    this.nextLevel = 20;
+    this.nextLevel = 40;
     this.inventory = ["potion", "hat"];
     this.gold = 0;
     this.killCount = 0;
@@ -56,7 +62,7 @@ function CreateCharacter(name, race, profession) {
         console.log("\n");
         console.log(" -- " + this.name + " -- ");
         console.log("lv." + this.level + " " + this.race + " " + this.profession);
-        console.log("Hp: " + this.hp + "/" + this.maxHp + "  |  MP: " + this.mp + "/" + this.maxMp + "  |  Strength: " + this.strength);
+        console.log("HP: " + this.hp + "/" + this.maxHp + "  |  MP: " + this.mp + "/" + this.maxMp + "  |  Strength: " + this.strength);
         console.log("XP: " + this.xp + " | to next level: " + (this.nextLevel - this.xp));
         console.log("Gold: " + this.gold);
         console.log(" -- Inventory -- ");
@@ -73,7 +79,7 @@ function CreateCharacter(name, race, profession) {
     this.levelUp = function () {
         if (this.xp >= this.nextLevel) {
             this.level++;
-            this.nextLevel = ((this.nextLevel * 2) + (this.level * 10));
+            this.nextLevel += this.level * 30;
             this.strength += 2;
             this.maxHp += 5;
             this.hp = this.maxHp;
@@ -108,7 +114,7 @@ function CreateMonster(name, strength, maxHp, maxMp, xp, gold) {
 
         console.log("\n");
         console.log(" -- " + this.name + " -- ");
-        console.log("Hp: " + this.hp + "/" + this.maxHp + "  |  MP: " + this.mp + "/" + this.maxMp + "  |  Strength: " + this.strength);
+        console.log("HP: " + this.hp + "/" + this.maxHp + "  |  MP: " + this.mp + "/" + this.maxMp + "  |  Strength: " + this.strength);
         console.log("XP: " + this.xp);
         console.log(" -- Inventory -- ");
         console.log(this.inventory);
@@ -131,11 +137,17 @@ monsters = []
 //                            name, strength, maxHp, maxMp, xp, gold
 var slime = new CreateMonster("Slime", 2, 10, 0, 10, 10);
 monsters.push(slime);
-var goblin = new CreateMonster("Goblin", 5, 15, 0, 15, 15);
+var wolf = new CreateMonster("Wolf", 5, 12, 0, 12, 12);
+monsters.push(wolf);
+var goblin = new CreateMonster("Goblin", 6, 15, 0, 15, 15);
 monsters.push(goblin);
 var orc = new CreateMonster("Orc", 8, 20, 0, 20, 20);
 monsters.push(orc);
-var demon = new CreateMonster("Demon", 12, 30, 10, 30, 30);
+var ogre = new CreateMonster("Ogre", 10, 25, 0, 25, 25);
+monsters.push(ogre);
+var giant = new CreateMonster("Giant", 12, 30, 10, 30, 30);
+monsters.push(giant);
+var demon = new CreateMonster("Demon", 15, 35, 10, 35, 35);
 monsters.push(demon);
 var dragon = new CreateMonster("Dragon", 16, 40, 10, 40, 40);
 monsters.push(dragon);
@@ -177,6 +189,12 @@ function gameStart() {
 }
 
 function whereTo() {
+
+    isFighting = false;
+    isExploring = true;
+    isInTown = false;
+    console.log("f-" + isFighting + " e-" + isExploring + " t-" + isInTown);
+
     inquirer.prompt({
             type: "list",
             message: "Where to next?",
@@ -191,8 +209,16 @@ function whereTo() {
                     break;
 
                 case "Go to town":
-                    console.log("\nYou went to town.\n")
-                    goToTown();
+
+                    var safeTripCheck = randNum(1, 5)
+                    if (safeTripCheck != 1) {
+                        console.log("\nYou got to town safely.\n")
+                        goToTown();
+                    } else {
+                        console.log("\nYou have been ambushed!");
+                        monsterEncounter();
+                    }
+
                     break;
 
                 case "Check stats":
@@ -208,11 +234,34 @@ function whereTo() {
 }
 
 function monsterEncounter() {
-    var monNum = randNum(0, player.level)
-    currentEnemy = monsters[monNum];
 
-    console.log("\nYou encountered a " + currentEnemy.name + ".")
-    console.log("Hp: " + currentEnemy.hp + "/" + currentEnemy.maxHp + "  |  MP: " + currentEnemy.mp + "/" + currentEnemy.maxMp + "  |  Strength: " + currentEnemy.strength + "\n");
+    isFighting = true;
+    isExploring = false;
+    isInTown = false;
+    console.log("f-" + isFighting + " e-" + isExploring + " t-" + isInTown);
+
+    var floorNum = 0;
+    var rangeNum = 0;
+
+    if (player.level >= 5) {
+        floorNum = player.level - 5;
+        rangeNum = 5
+    } else {
+        floorNum = 0;
+        rangeNum = player.level;
+    }
+    var monNum = randNum(floorNum, rangeNum)
+    currentEnemy = monsters[monNum];
+    var firstLetter = currentEnemy.name.charAt(0);
+    var anA = "a";
+    if (firstLetter === "A" || firstLetter === "E" || firstLetter === "I" || firstLetter === "O" || firstLetter === "U") {
+        anA = "an";
+    } else {
+        anA = "a";
+    }
+
+    console.log("\nYou encountered " + anA + " " + currentEnemy.name + ".")
+    console.log("HP: " + currentEnemy.hp + "/" + currentEnemy.maxHp + "  |  MP: " + currentEnemy.mp + "/" + currentEnemy.maxMp + "  |  Strength: " + currentEnemy.strength + "\n");
 
     fight();
 
@@ -221,7 +270,7 @@ function monsterEncounter() {
 function fight() {
     inquirer.prompt({
             type: "list",
-            message: "What next?",
+            message: "Next move?",
             name: "action",
             choices: ["Attack", "Use item", "Check stats", "Run"]
         })
@@ -262,8 +311,7 @@ function fight() {
                     break;
 
                 case "Use item":
-                    console.log("You used an Item.")
-                    fight();
+                    useItem();
                     break;
 
                 case "Check stats":
@@ -295,6 +343,11 @@ function fight() {
 }
 
 function goToTown() {
+
+    isFighting = false;
+    isExploring = false;
+    isInTown = true;
+
     inquirer.prompt({
             type: "list",
             message: "What next?",
@@ -353,6 +406,31 @@ function stayAtInn() {
 
             }
         });
+}
+
+function useItem() {
+    inquirer.prompt({
+            type: "list",
+            message: "What do you want to use?",
+            name: "action",
+            choices: player.inventory
+        })
+        .then(function (choice) {
+            switch (choice.action) {
+                case "potion":
+                    player.hp += 10
+
+                    console.log("\nYou gained " + 10 + "\n")
+                    fight();
+                    break;
+
+                case "hat":
+                    console.log("You Look good with it on...")
+                    goToTown();
+                    break;
+
+            };
+        })
 }
 
 gameStart();
