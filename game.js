@@ -4,7 +4,18 @@ var inquirer = require("inquirer");
 var isInTown = false;
 var isExploring = true;
 var isFighting = false;
-console.log("f-" + isFighting + " e-" + isExploring + " t-" + isInTown);
+// console.log("f-" + isFighting + " E-" + isExploring + " t-" + isInTown);
+
+function gameStateCheck() {
+
+    if (isFighting === true) {
+        fight();
+    } else if (isExploring === true) {
+        whereTo();
+    } else if (isInTown === true) {
+        goToTown();
+    }
+}
 
 function nameStructure(roughName) {
     if (roughName != "") {
@@ -28,6 +39,12 @@ function dropGold() {
 }
 
 function runLoss() {
+
+    isFighting = false;
+    isExploring = true;
+    isInTown = false;
+    // console.log("f-" + isFighting + " E-" + isExploring + " t-" + isInTown);
+
     var amount = randNum(0, Math.floor(player.gold / 2));
     player.gold -= amount;
     console.log("You lost " + amount + " gold.")
@@ -35,6 +52,8 @@ function runLoss() {
     var loseHealth = randNum(0, 3)
     player.hp -= loseHealth
     console.log("You lost " + loseHealth + " HP.")
+
+
 
 }
 
@@ -46,13 +65,13 @@ function CreateCharacter(name, race, profession) {
     this.profession = profession;
     this.strength = 5;
     this.maxHp = 10;
-    this.hp = 10;
+    this.hp = 8;
     this.maxMp = 10;
     this.mp = 10;
     this.level = 1;
     this.xp = 0;
     this.nextLevel = 40;
-    this.inventory = ["potion", "hat"];
+    this.inventory = ["< Go back", "Health potion", "Health potion", "Mana potion", "hat"];
     this.gold = 0;
     this.killCount = 0;
     this.isDead = false;
@@ -66,7 +85,7 @@ function CreateCharacter(name, race, profession) {
         console.log("XP: " + this.xp + " | to next level: " + (this.nextLevel - this.xp));
         console.log("Gold: " + this.gold);
         console.log(" -- Inventory -- ");
-        console.log(this.inventory);
+        console.log(this.inventory.slice(1));
         console.log("\n");
     }
 
@@ -152,8 +171,7 @@ monsters.push(demon);
 var dragon = new CreateMonster("Dragon", 16, 40, 10, 40, 40);
 monsters.push(dragon);
 
-// console.log(monsters)
-console.log("Monster: " + monsters.length)
+// console.log("Monsters Available: " + monsters.length)
 
 function gameStart() {
     inquirer
@@ -193,13 +211,13 @@ function whereTo() {
     isFighting = false;
     isExploring = true;
     isInTown = false;
-    console.log("f-" + isFighting + " e-" + isExploring + " t-" + isInTown);
+    // console.log("f-" + isFighting + " E-" + isExploring + " t-" + isInTown);
 
     inquirer.prompt({
             type: "list",
             message: "Where to next?",
             name: "action",
-            choices: ["Next battle", "Go to town", "Check stats", "Quit"]
+            choices: ["Next battle", "Go to town", "Use item", "Check stats", "Quit"]
         })
         .then(function (choice) {
             switch (choice.action) {
@@ -221,6 +239,10 @@ function whereTo() {
 
                     break;
 
+                case "Use item":
+                    useItem();
+                    break;
+
                 case "Check stats":
                     player.checkStats();
                     whereTo();
@@ -238,7 +260,7 @@ function monsterEncounter() {
     isFighting = true;
     isExploring = false;
     isInTown = false;
-    console.log("f-" + isFighting + " e-" + isExploring + " t-" + isInTown);
+    // console.log("F-" + isFighting + " e-" + isExploring + " t-" + isInTown);
 
     var floorNum = 0;
     var rangeNum = 0;
@@ -295,17 +317,7 @@ function fight() {
                         currentEnemy.attack(player);
                         console.log("--------\n")
 
-                        if (player.hp <= 0) {
-
-                            console.log("\n--------")
-                            console.log(currentEnemy.name + " has Killed you.\n");
-                            console.log(player.name + " reached lv." + player.level);
-                            console.log("and killed " + player.killCount + " monsters.\n")
-                            console.log(" -- GAME OVER -- ");
-                            console.log("--------\n")
-                        } else {
-                            fight();
-                        }
+                        gameOverCheck();
 
                     }
                     break;
@@ -325,17 +337,7 @@ function fight() {
                     console.log("You Ran Away.")
                     runLoss();
                     console.log("--------\n")
-                    if (player.hp <= 0) {
-
-                        console.log("\n--------")
-                        console.log(currentEnemy.name + " has Killed you.\n");
-                        console.log(player.name + " reached lv." + player.level);
-                        console.log("and killed " + player.killCount + " monsters.\n")
-                        console.log(" -- GAME OVER -- ");
-                        console.log("--------\n")
-                    } else {
-                        whereTo()
-                    }
+                    gameOverCheck();
 
                     break;
             }
@@ -347,12 +349,13 @@ function goToTown() {
     isFighting = false;
     isExploring = false;
     isInTown = true;
+    // console.log("f-" + isFighting + " e-" + isExploring + " T-" + isInTown);
 
     inquirer.prompt({
             type: "list",
             message: "What next?",
             name: "action",
-            choices: ["Stay at Inn", "Go to shop", "Check stats", "Leave town"]
+            choices: ["Stay at Inn", "Go to shop", "Use item", "Check stats", "Leave town"]
         })
         .then(function (choice) {
             switch (choice.action) {
@@ -363,6 +366,10 @@ function goToTown() {
                 case "Go to shop":
                     console.log("You visited the shop. Nothing looks good")
                     goToTown();
+                    break;
+
+                case "Use item":
+                    useItem();
                     break;
 
                 case "Check stats":
@@ -417,20 +424,65 @@ function useItem() {
         })
         .then(function (choice) {
             switch (choice.action) {
-                case "potion":
-                    player.hp += 10
 
-                    console.log("\nYou gained " + 10 + "\n")
-                    fight();
+                case "< Go back":
+
+                    gameStateCheck();
+
+                    break;
+
+                case "Health potion":
+
+                    if (player.hp < player.maxHp) {
+                        player.hp += 10
+                        if (player.hp > player.maxHp) {
+                            player.hp = player.maxHp;
+                        }
+
+                        console.log("\nYou gained " + 10 + "\n")
+                        removeItem("Health potion", player.inventory);
+                        gameStateCheck();
+                    } else {
+                        console.log("\nYou are already at full health.\n")
+                        gameStateCheck();
+                    }
+
                     break;
 
                 case "hat":
-                    console.log("You Look good with it on...")
-                    goToTown();
+                    console.log("\nIt looks good on you...\n")
+
+                    gameStateCheck();
+
                     break;
 
             };
         })
+}
+
+
+function removeItem(item, array) {
+    var index = array.indexOf(item);
+    if (index !== -1) {
+        array.splice(index, 1);
+    }
+    // console.log(array);
+}
+
+function gameOverCheck() {
+    if (player.hp <= 0) {
+
+        console.log("\n--------")
+        console.log(currentEnemy.name + " has Killed you.\n");
+        console.log(player.name + " reached lv." + player.level);
+        console.log("and killed " + player.killCount + " monsters.\n")
+        console.log(" -- GAME OVER -- ");
+        console.log("--------\n")
+    } else if (isFighting === true) {
+        fight();
+    } else if (isExploring === true) {
+        whereTo();
+    }
 }
 
 gameStart();
