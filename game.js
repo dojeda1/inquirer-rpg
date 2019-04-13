@@ -65,7 +65,7 @@ function runLoss() {
 
 }
 
-var shopInventory = ["< Go back", "Health potion", "Mana potion", "Hat"];
+var shopInventory = ["< Go back", "Health Potion", "Mana Potion", "Old Hat"];
 
 // character creators
 function CreateCharacter(name, race, profession) {
@@ -84,7 +84,7 @@ function CreateCharacter(name, race, profession) {
     this.level = 1;
     this.xp = 0;
     this.nextLevel = 40;
-    this.inventory = ["< Go back", "Health potion", "Mana potion", "Hat"];
+    this.inventory = ["< Go back", "Health Potion", "Mana Potion", "Old hat"];
     this.gold = 0;
     this.killCount = 0;
     this.isDead = false;
@@ -143,7 +143,7 @@ function CreateCharacter(name, race, profession) {
 
 };
 
-function CreateMonster(name, strength, speed, maxHp, maxMp, xp, gold) {
+function CreateMonster(name, strength, speed, maxHp, maxMp, xp, gold, invArr) {
 
     this.name = name
     this.strength = strength;
@@ -153,7 +153,7 @@ function CreateMonster(name, strength, speed, maxHp, maxMp, xp, gold) {
     this.maxMp = maxMp;
     this.mp = maxMp;
     this.xp = xp;
-    this.inventory = [];
+    this.inventory = invArr;
     this.gold = gold;
     this.isDead = false;
 
@@ -191,22 +191,22 @@ function CreateMonster(name, strength, speed, maxHp, maxMp, xp, gold) {
 // create monsters
 var currentEnemy = {};
 monsters = []
-//                            name, strength, speed, maxHp, maxMp, xp, gold
-var slime = new CreateMonster("Slime", 3, 10, 10, 0, 10, 10);
+//                            name, strength, speed, maxHp, maxMp, xp, gold, invArr
+var slime = new CreateMonster("Slime", 3, 10, 10, 0, 10, 10, ["Health Potion"]);
 monsters.push(slime);
-var wolf = new CreateMonster("Wolf", 5, 15, 12, 0, 12, 12);
+var wolf = new CreateMonster("Wolf", 5, 15, 12, 0, 12, 12, ["Health Potion"]);
 monsters.push(wolf);
-var goblin = new CreateMonster("Goblin", 6, 12, 15, 0, 15, 15);
+var goblin = new CreateMonster("Goblin", 6, 12, 15, 0, 15, 15, ["Health Potion"]);
 monsters.push(goblin);
-var orc = new CreateMonster("Orc", 8, 18, 20, 0, 20, 20);
+var orc = new CreateMonster("Orc", 8, 18, 20, 0, 20, 20, ["Health Potion"]);
 monsters.push(orc);
-var ogre = new CreateMonster("Ogre", 10, 12, 25, 0, 25, 25);
+var ogre = new CreateMonster("Ogre", 10, 12, 25, 0, 25, 25, ["Health Potion"]);
 monsters.push(ogre);
-var giant = new CreateMonster("Giant", 15, 10, 30, 10, 30, 30);
+var giant = new CreateMonster("Giant", 15, 10, 30, 10, 30, 30, ["Health Potion"]);
 monsters.push(giant);
-var demon = new CreateMonster("Demon", 15, 20, 35, 10, 35, 35);
+var demon = new CreateMonster("Demon", 15, 20, 35, 10, 35, 35, ["Health Potion"]);
 monsters.push(demon);
-var dragon = new CreateMonster("Dragon", 16, 18, 40, 10, 40, 40);
+var dragon = new CreateMonster("Dragon", 16, 18, 40, 10, 40, 40, ["Health Potion"]);
 monsters.push(dragon);
 
 // console.log("Monsters Available: " + monsters.length)
@@ -285,6 +285,38 @@ function gameStart() {
                     player.defense += 2
                     player.speed += 0
                     player.luck += 0
+
+                    player.special = {
+                        name: "Fireball",
+                        mpCost: 6,
+
+                        move: function (opponent) {
+                            if (player.special.mpCost <= player.mp) {
+                                player.mp -= player.special.mpCost;
+                                var luckCheck = (2 + opponent.speed - player.luck)
+                                var criticalCheck = randNum(1, luckCheck);
+                                var magicStrength = player.strength + Math.floor(player.maxMp / 3)
+
+                                if (criticalCheck != 1) {
+
+                                    opponent.hp -= magicStrength;
+                                    console.log("Your flames hit " + opponent.name + " for " + magicStrength + " damage.")
+                                    console.log(opponent.name + " has " + opponent.hp + " HP left.")
+                                    enemyDeathCheck();
+                                } else {
+                                    var newStrength = magicStrength + Math.floor(magicStrength / 2);
+                                    opponent.hp -= newStrength;
+                                    console.log("Critical hit for " + newStrength + " damage!!!");
+                                    console.log(opponent.name + " has " + opponent.hp + " HP left.");
+                                    enemyDeathCheck();
+                                }
+                            } else {
+                                console.log("You do not have enough MP to perform this move.");
+                                console.log("--------\n");
+                                gameOverCheck();
+                            }
+                        }
+                    }
                     break;
 
                 case "Rogue":
@@ -296,7 +328,41 @@ function gameStart() {
                     player.defense += 0
                     player.speed += 1
                     player.luck += 2
+
+                    player.special = {
+                        name: "Fireball",
+                        mpCost: 6,
+
+                        move: function (opponent) {
+                            if (player.special.mpCost <= player.mp) {
+                                player.mp -= player.special.mpCost;
+                                var luckCheck = (2 + opponent.speed - player.luck)
+                                var criticalCheck = randNum(1, luckCheck);
+                                var magicStrength = player.strength + Math.floor(player.maxMp / 3)
+
+                                if (criticalCheck != 1) {
+
+                                    opponent.hp -= magicStrength;
+                                    console.log("Your flames hit " + opponent.name + " for " + magicStrength + " damage.")
+                                    console.log(opponent.name + " has " + opponent.hp + " HP left.")
+                                    enemyDeathCheck();
+                                } else {
+                                    var newStrength = magicStrength + Math.floor(magicStrength / 2);
+                                    opponent.hp -= newStrength;
+                                    console.log("Critical hit for " + newStrength + " damage!!!");
+                                    console.log(opponent.name + " has " + opponent.hp + " HP left.");
+                                    enemyDeathCheck();
+                                }
+                            } else {
+                                console.log("You do not have enough MP to perform this move.");
+                                console.log("--------\n");
+                                gameOverCheck();
+                            }
+                        }
+                    }
                     break;
+
+
 
                 case "Mage":
                     player.maxHp += 0
@@ -307,12 +373,44 @@ function gameStart() {
                     player.defense += 0
                     player.speed += 0
                     player.luck += 1
-                    break;
+
+                    player.special = {
+                        name: "Fireball",
+                        mpCost: 6,
+
+                        move: function (opponent) {
+                            if (player.special.mpCost <= player.mp) {
+                                player.mp -= player.special.mpCost;
+                                var luckCheck = (2 + opponent.speed - player.luck)
+                                var criticalCheck = randNum(1, luckCheck);
+                                var magicStrength = player.strength + Math.floor(player.maxMp / 3)
+
+                                if (criticalCheck != 1) {
+
+                                    opponent.hp -= magicStrength;
+                                    console.log("Your flames hit " + opponent.name + " for " + magicStrength + " damage.")
+                                    console.log(opponent.name + " has " + opponent.hp + " HP left.")
+                                    enemyDeathCheck();
+                                } else {
+                                    var newStrength = magicStrength + Math.floor(magicStrength / 2);
+                                    opponent.hp -= newStrength;
+                                    console.log("Critical hit for " + newStrength + " damage!!!");
+                                    console.log(opponent.name + " has " + opponent.hp + " HP left.");
+                                    enemyDeathCheck();
+                                }
+                            } else {
+                                console.log("You do not have enough MP to perform this move.");
+                                console.log("--------\n");
+                                gameOverCheck();
+                            }
+                        }
+                    }
 
             }
 
             // testing area
             player.checkStats();
+
             whereTo();
 
         });
@@ -411,36 +509,25 @@ function fight() {
             type: "list",
             message: "Next move?",
             name: "action",
-            choices: ["Attack", "Use item", "Check stats", "Run"]
+            choices: ["Attack", player.special.name, "Use item", "Check stats", "Run"]
         })
         .then(function (choice) {
             switch (choice.action) {
                 case "Attack":
                     console.log("\n--------")
                     player.attack(currentEnemy);
-                    if (currentEnemy.hp <= 0) {
-                        console.log("You killed " + currentEnemy.name + ".\n");
-                        player.killCount++;
-                        dropGold();
-                        player.gainXp(currentEnemy);
-                        player.levelUp();
-                        currentEnemy.hp = currentEnemy.maxHp;
-                        currentEnemy.mp = currentEnemy.maxMp;
-                        console.log("--------\n");
+                    enemyDeathCheck();
+                    break;
 
-                        whereTo();
-
-                    } else {
-                        currentEnemy.attack(player);
-                        console.log("--------\n")
-
-                        gameOverCheck();
-
-                    }
+                case player.special.name:
+                    console.log("\n--------")
+                    player.special.move(currentEnemy);
                     break;
 
                 case "Use item":
+
                     useItem();
+
                     break;
 
                 case "Check stats":
@@ -459,6 +546,28 @@ function fight() {
                     break;
             }
         })
+}
+
+function enemyDeathCheck() {
+    if (currentEnemy.hp <= 0) {
+        console.log("You killed " + currentEnemy.name + ".\n");
+        player.killCount++;
+        dropGold();
+        player.gainXp(currentEnemy);
+        player.levelUp();
+        currentEnemy.hp = currentEnemy.maxHp;
+        currentEnemy.mp = currentEnemy.maxMp;
+        console.log("--------\n");
+
+        whereTo();
+
+    } else {
+        currentEnemy.attack(player);
+        console.log("--------\n")
+
+        gameOverCheck();
+
+    }
 }
 
 function goToTown() {
@@ -579,16 +688,16 @@ function buy() {
                     shop();;
                     break;
 
-                case "Health potion":
-                    itemPurchase("Health potion", 5);
+                case "Health Potion":
+                    itemPurchase("Health Potion", 5);
                     break;
 
-                case "Mana potion":
-                    itemPurchase("Mana potion", 5)
+                case "Mana Potion":
+                    itemPurchase("Mana Potion", 5)
                     break;
 
-                case "Hat":
-                    itemPurchase("Hat", 100)
+                case "Old hat":
+                    itemPurchase("Old hat", 100)
                     break;
 
 
@@ -645,16 +754,16 @@ function sell() {
                     shop();;
                     break;
 
-                case "Health potion":
-                    itemSell("Health potion", 3);
+                case "Health Potion":
+                    itemSell("Health Potion", 3);
                     break;
 
-                case "Mana potion":
-                    itemSell("Mana potion", 3)
+                case "Mana Potion":
+                    itemSell("Mana Potion", 3)
                     break;
 
-                case "Hat":
-                    itemSell("Hat", 100)
+                case "Old hat":
+                    itemSell("Old hat", 100)
                     break;
 
 
@@ -704,7 +813,7 @@ function useItem() {
 
                     break;
 
-                case "Health potion":
+                case "Health Potion":
 
                     if (player.hp < player.maxHp) {
                         player.hp += 10
@@ -712,12 +821,14 @@ function useItem() {
                             player.hp = player.maxHp;
                         }
 
-                        console.log("\nYou recovered " + 10 + " HP\n")
-                        removeItem("Health potion", player.inventory);
+                        console.log("\n--------");
+                        console.log("You recovered " + 10 + " HP")
+                        removeItem("Health Potion", player.inventory);
 
                         if (isFighting === true) {
                             currentEnemy.attack(player);
                         }
+                        console.log("--------\n");
                         gameStateCheck();
                     } else {
                         console.log("\nYou are already at full Health.\n")
@@ -726,20 +837,21 @@ function useItem() {
 
                     break;
 
-                case "Mana potion":
+                case "Mana Potion":
 
                     if (player.mp < player.maxMp) {
                         player.mp += 10
                         if (player.mp > player.maxMp) {
                             player.mp = player.maxMp;
                         }
-
-                        console.log("\nYou recovered " + 8 + " MP\n")
-                        removeItem("Mana potion", player.inventory);
+                        console.log("\n--------");
+                        console.log("You recovered " + 8 + " MP")
+                        removeItem("Mana Potion", player.inventory);
 
                         if (isFighting === true) {
                             currentEnemy.attack(player);
                         }
+                        console.log("--------\n");
                         gameStateCheck();
                     } else {
                         console.log("\nYou are already at full Mana.\n")
@@ -749,7 +861,9 @@ function useItem() {
                     break;
 
                 case "Hat":
-                    console.log("\nIt looks good on you...\n")
+                    console.log("--------\n");
+                    console.log("It looks good on you...")
+                    console.log("--------\n");
 
                     gameStateCheck();
 
