@@ -73,18 +73,18 @@ function CreateCharacter(name, race, profession) {
     this.name = nameStructure(name)
     this.race = race;
     this.profession = profession;
-    this.strength = 5;
-    this.defense = 5;
-    this.luck = 5;
-    this.speed = 5;
-    this.maxHp = 10;
-    this.hp = 8;
-    this.maxMp = 10;
-    this.mp = 10;
+    this.strength = 4;
+    this.defense = 4;
+    this.luck = 4;
+    this.speed = 4;
+    this.maxHp = 4;
+    this.hp = 4;
+    this.maxMp = 4;
+    this.mp = 4;
     this.level = 1;
     this.xp = 0;
     this.nextLevel = 40;
-    this.inventory = ["< Go back", "Health potion", "Health potion", "Mana potion", "hat"];
+    this.inventory = ["< Go back", "Health potion", "Mana potion", "Hat"];
     this.gold = 0;
     this.killCount = 0;
     this.isDead = false;
@@ -94,7 +94,8 @@ function CreateCharacter(name, race, profession) {
         console.log("\n");
         console.log(" -- " + this.name + " -- ");
         console.log("lv." + this.level + " " + this.race + " " + this.profession);
-        console.log("HP: " + this.hp + "/" + this.maxHp + "  |  MP: " + this.mp + "/" + this.maxMp + "  |  Strength: " + this.strength);
+        console.log("HP: " + this.hp + "/" + this.maxHp + "  |  MP: " + this.mp + "/" + this.maxMp);
+        console.log("ATK: " + this.strength + "  |  DEF: " + this.defense + "  |  SPD: " + this.speed + "  |  LUCK: " + this.luck);
         console.log("XP: " + this.xp + " | to next level: " + (this.nextLevel - this.xp));
         console.log("Gold: " + this.gold);
         console.log(" -- Inventory -- ");
@@ -103,9 +104,19 @@ function CreateCharacter(name, race, profession) {
     }
 
     this.attack = function (opponent) {
-        opponent.hp -= this.strength;
-        console.log("You attacked " + opponent.name + " for " + this.strength + " damage.")
-        console.log(opponent.name + " has " + opponent.hp + " HP left.")
+
+        var luckCheck = opponent.speed - this.luck
+        var criticalCheck = randNum(1, luckCheck)
+        if (criticalCheck != 1) {
+            opponent.hp -= this.strength;
+            console.log("You attacked " + opponent.name + " for " + this.strength + " damage.")
+            console.log(opponent.name + " has " + opponent.hp + " HP left.")
+        } else {
+            var newStrength = this.strength + Math.floor(this.strength / 2);
+            opponent.hp -= newStrength;
+            console.log("Critical hit for " + newStrength + " damage!!!")
+            console.log(opponent.name + " has " + opponent.hp + " HP left.")
+        }
     }
 
     this.levelUp = function () {
@@ -113,6 +124,9 @@ function CreateCharacter(name, race, profession) {
             this.level++;
             this.nextLevel += this.level * 30;
             this.strength += 2;
+            this.defense += 1;
+            this.speed += 1;
+            this.luck += 1;
             this.maxHp += 5;
             this.hp = this.maxHp;
             this.maxMp += 4;
@@ -129,10 +143,11 @@ function CreateCharacter(name, race, profession) {
 
 };
 
-function CreateMonster(name, strength, maxHp, maxMp, xp, gold) {
+function CreateMonster(name, strength, speed, maxHp, maxMp, xp, gold) {
 
     this.name = name
     this.strength = strength;
+    this.speed = speed;
     this.maxHp = maxHp;
     this.hp = maxHp;
     this.maxMp = maxMp;
@@ -154,10 +169,20 @@ function CreateMonster(name, strength, maxHp, maxMp, xp, gold) {
     }
 
     this.attack = function (opponent) {
-        opponent.hp -= this.strength;
-        console.log(this.name + " attacked you for " + this.strength + " damage.")
-        console.log("You have " + opponent.hp + " HP left.")
+        var SpeedNum = this.speed - player.speed
+        var missCheck = randNum(1, SpeedNum)
 
+        if (missCheck != 1) {
+
+            var newStrength = this.strength - Math.floor(player.defense / 4)
+
+            opponent.hp -= newStrength;
+
+            console.log(this.name + " attacked you for " + newStrength + " damage.")
+            console.log("You have " + opponent.hp + " HP left.")
+        } else {
+            console.log(this.name + " missed!")
+        }
 
     }
 
@@ -166,22 +191,22 @@ function CreateMonster(name, strength, maxHp, maxMp, xp, gold) {
 // create monsters
 var currentEnemy = {};
 monsters = []
-//                            name, strength, maxHp, maxMp, xp, gold
-var slime = new CreateMonster("Slime", 2, 10, 0, 10, 10);
+//                            name, strength, speed, maxHp, maxMp, xp, gold
+var slime = new CreateMonster("Slime", 3, 10, 10, 0, 10, 10);
 monsters.push(slime);
-var wolf = new CreateMonster("Wolf", 5, 12, 0, 12, 12);
+var wolf = new CreateMonster("Wolf", 5, 15, 12, 0, 12, 12);
 monsters.push(wolf);
-var goblin = new CreateMonster("Goblin", 6, 15, 0, 15, 15);
+var goblin = new CreateMonster("Goblin", 6, 12, 15, 0, 15, 15);
 monsters.push(goblin);
-var orc = new CreateMonster("Orc", 8, 20, 0, 20, 20);
+var orc = new CreateMonster("Orc", 8, 18, 20, 0, 20, 20);
 monsters.push(orc);
-var ogre = new CreateMonster("Ogre", 10, 25, 0, 25, 25);
+var ogre = new CreateMonster("Ogre", 10, 12, 25, 0, 25, 25);
 monsters.push(ogre);
-var giant = new CreateMonster("Giant", 12, 30, 10, 30, 30);
+var giant = new CreateMonster("Giant", 15, 10, 30, 10, 30, 30);
 monsters.push(giant);
-var demon = new CreateMonster("Demon", 15, 35, 10, 35, 35);
+var demon = new CreateMonster("Demon", 15, 20, 35, 10, 35, 35);
 monsters.push(demon);
-var dragon = new CreateMonster("Dragon", 16, 40, 10, 40, 40);
+var dragon = new CreateMonster("Dragon", 16, 18, 40, 10, 40, 40);
 monsters.push(dragon);
 
 // console.log("Monsters Available: " + monsters.length)
@@ -212,10 +237,84 @@ function gameStart() {
             console.log("Character Created")
 
             player = new CreateCharacter(newPlayer.name, newPlayer.race, newPlayer.profession);
+            switch (player.race) {
+
+                case "Human":
+                    player.maxHp += 4
+                    player.hp += 4
+                    player.maxMp += 4
+                    player.mp += 4
+                    player.strength += 1
+                    player.defense += 1
+                    player.speed += 1
+                    player.luck += 0
+                    break;
+
+                case "Elf":
+                    player.maxHp += 4
+                    player.hp += 4
+                    player.maxMp += 6
+                    player.mp += 6
+                    player.strength += 0
+                    player.defense += 0
+                    player.speed += 1
+                    player.luck += 1
+                    break;
+
+                case "Dwarf":
+                    player.maxHp += 6
+                    player.hp += 6
+                    player.maxMp += 2
+                    player.mp += 2
+                    player.strength += 2
+                    player.defense += 1
+                    player.speed += 0
+                    player.luck += 0
+                    break;
+
+            }
+
+            switch (player.profession) {
+
+                case "Warrior":
+                    player.maxHp += 4
+                    player.hp += 4
+                    player.maxMp += 0
+                    player.mp += 0
+                    player.strength += 2
+                    player.defense += 2
+                    player.speed += 0
+                    player.luck += 0
+                    break;
+
+                case "Rogue":
+                    player.maxHp += 0
+                    player.hp += 0
+                    player.maxMp += 2
+                    player.mp += 2
+                    player.strength += 0
+                    player.defense += 0
+                    player.speed += 1
+                    player.luck += 2
+                    break;
+
+                case "Mage":
+                    player.maxHp += 0
+                    player.hp += 0
+                    player.maxMp += 4
+                    player.mp += 4
+                    player.strength += 0
+                    player.defense += 0
+                    player.speed += 0
+                    player.luck += 1
+                    break;
+
+            }
 
             // testing area
             player.checkStats();
             whereTo();
+
         });
 }
 
@@ -243,7 +342,7 @@ function whereTo() {
 
                 case "Go to town":
 
-                    var safeTripCheck = randNum(1, 5)
+                    var safeTripCheck = randNum(1, player.luck)
                     if (safeTripCheck != 1) {
                         console.log("\nYou got to town safely.\n")
                         goToTown();
@@ -613,11 +712,37 @@ function useItem() {
                             player.hp = player.maxHp;
                         }
 
-                        console.log("\nYou recovered " + 10 + "HP\n")
+                        console.log("\nYou recovered " + 10 + " HP\n")
                         removeItem("Health potion", player.inventory);
+
+                        if (isFighting === true) {
+                            currentEnemy.attack(player);
+                        }
                         gameStateCheck();
                     } else {
-                        console.log("\nYou are already at full health.\n")
+                        console.log("\nYou are already at full Health.\n")
+                        gameStateCheck();
+                    }
+
+                    break;
+
+                case "Mana potion":
+
+                    if (player.mp < player.maxMp) {
+                        player.mp += 10
+                        if (player.mp > player.maxMp) {
+                            player.mp = player.maxMp;
+                        }
+
+                        console.log("\nYou recovered " + 8 + " MP\n")
+                        removeItem("Mana potion", player.inventory);
+
+                        if (isFighting === true) {
+                            currentEnemy.attack(player);
+                        }
+                        gameStateCheck();
+                    } else {
+                        console.log("\nYou are already at full Mana.\n")
                         gameStateCheck();
                     }
 
