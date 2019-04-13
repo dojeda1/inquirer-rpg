@@ -84,7 +84,7 @@ function CreateCharacter(name, race, profession) {
     this.level = 1;
     this.xp = 0;
     this.nextLevel = 40;
-    this.inventory = ["< Go back", "Health Potion", "Mana Potion", "Old hat"];
+    this.inventory = ["< Go back", "Health Potion", "Mana Potion", "Old Hat"];
     this.gold = 0;
     this.killCount = 0;
     this.isDead = false;
@@ -192,7 +192,7 @@ function CreateMonster(name, strength, speed, maxHp, maxMp, xp, gold, invArr) {
 var currentEnemy = {};
 monsters = []
 //                            name, strength, speed, maxHp, maxMp, xp, gold, invArr
-var slime = new CreateMonster("Slime", 3, 10, 10, 0, 10, 10, ["Health Potion"]);
+var slime = new CreateMonster("Slime", 3, 10, 10, 0, 10, 10, ["Health Potion", "Old Hat"]);
 monsters.push(slime);
 var wolf = new CreateMonster("Wolf", 5, 15, 12, 0, 12, 12, ["Health Potion"]);
 monsters.push(wolf);
@@ -330,27 +330,35 @@ function gameStart() {
                     player.luck += 2
 
                     player.special = {
-                        name: "Fireball",
-                        mpCost: 6,
+                        name: "Steal",
+                        mpCost: 4,
 
                         move: function (opponent) {
                             if (player.special.mpCost <= player.mp) {
                                 player.mp -= player.special.mpCost;
-                                var luckCheck = (2 + opponent.speed - player.luck)
-                                var criticalCheck = randNum(1, luckCheck);
-                                var magicStrength = player.strength + Math.floor(player.maxMp / 3)
+                                var luckCheck = (opponent.speed - player.luck)
+                                var stealCheck = randNum(1, luckCheck);
 
-                                if (criticalCheck != 1) {
+                                if (stealCheck <= 8) {
 
-                                    opponent.hp -= magicStrength;
-                                    console.log("Your flames hit " + opponent.name + " for " + magicStrength + " damage.")
-                                    console.log(opponent.name + " has " + opponent.hp + " HP left.")
+                                    var monsterIndex = randNum(0, currentEnemy.inventory.length);
+                                    var stealItem = currentEnemy.inventory[monsterIndex];
+
+                                    var firstLetter = stealItem.charAt(0);
+
+                                    var anA = "a";
+                                    if (firstLetter === "A" || firstLetter === "E" || firstLetter === "I" || firstLetter === "O" || firstLetter === "U") {
+                                        anA = "an";
+                                    } else {
+                                        anA = "a";
+                                    }
+
+                                    player.inventory.push(stealItem);
+                                    console.log("You stole " + anA + " " + stealItem + "!")
+
                                     enemyDeathCheck();
                                 } else {
-                                    var newStrength = magicStrength + Math.floor(magicStrength / 2);
-                                    opponent.hp -= newStrength;
-                                    console.log("Critical hit for " + newStrength + " damage!!!");
-                                    console.log(opponent.name + " has " + opponent.hp + " HP left.");
+                                    console.log("You didn't steal anything...")
                                     enemyDeathCheck();
                                 }
                             } else {
@@ -696,8 +704,8 @@ function buy() {
                     itemPurchase("Mana Potion", 5)
                     break;
 
-                case "Old hat":
-                    itemPurchase("Old hat", 100)
+                case "Old Hat":
+                    itemPurchase("Old Hat", 100)
                     break;
 
 
@@ -762,8 +770,8 @@ function sell() {
                     itemSell("Mana Potion", 3)
                     break;
 
-                case "Old hat":
-                    itemSell("Old hat", 100)
+                case "Old Hat":
+                    itemSell("Old Hat", 100)
                     break;
 
 
