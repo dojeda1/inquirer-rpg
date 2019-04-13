@@ -4,6 +4,8 @@ var inquirer = require("inquirer");
 var isInTown = false;
 var isExploring = true;
 var isFighting = false;
+var isBuying = false;
+var isSelling = false;
 // console.log("f-" + isFighting + " E-" + isExploring + " t-" + isInTown);
 
 function gameStateCheck() {
@@ -14,6 +16,10 @@ function gameStateCheck() {
         whereTo();
     } else if (isInTown === true) {
         goToTown();
+    } else if (isBuying === true) {
+        buy();
+    } else if (isSelling === true) {
+        sell();
     }
 }
 
@@ -43,6 +49,8 @@ function runLoss() {
     isFighting = false;
     isExploring = true;
     isInTown = false;
+    isBuying = false;
+    isSelling = false;
     // console.log("f-" + isFighting + " E-" + isExploring + " t-" + isInTown);
 
     var amount = randNum(0, Math.floor(player.gold / 2));
@@ -57,6 +65,8 @@ function runLoss() {
 
 }
 
+var shopInventory = ["< Go back", "Health potion", "Mana potion", "Hat"];
+
 // character creators
 function CreateCharacter(name, race, profession) {
 
@@ -64,6 +74,9 @@ function CreateCharacter(name, race, profession) {
     this.race = race;
     this.profession = profession;
     this.strength = 5;
+    this.defense = 5;
+    this.luck = 5;
+    this.speed = 5;
     this.maxHp = 10;
     this.hp = 8;
     this.maxMp = 10;
@@ -211,6 +224,8 @@ function whereTo() {
     isFighting = false;
     isExploring = true;
     isInTown = false;
+    isBuying = false;
+    isSelling = false;
     // console.log("f-" + isFighting + " E-" + isExploring + " t-" + isInTown);
 
     inquirer.prompt({
@@ -249,17 +264,20 @@ function whereTo() {
                     break;
 
                 case "Quit":
-                    console.log("Good bye " + player.name + ".");
+                    quit();
                     break;
             }
         })
 }
+
 
 function monsterEncounter() {
 
     isFighting = true;
     isExploring = false;
     isInTown = false;
+    isBuying = false;
+    isSelling = false;
     // console.log("F-" + isFighting + " e-" + isExploring + " t-" + isInTown);
 
     var floorNum = 0;
@@ -349,6 +367,8 @@ function goToTown() {
     isFighting = false;
     isExploring = false;
     isInTown = true;
+    isBuying = false;
+    isSelling = false;
     // console.log("f-" + isFighting + " e-" + isExploring + " T-" + isInTown);
 
     inquirer.prompt({
@@ -364,8 +384,7 @@ function goToTown() {
                     break;
 
                 case "Go to shop":
-                    console.log("You visited the shop. Nothing looks good")
-                    goToTown();
+                    shop();
                     break;
 
                 case "Use item":
@@ -396,20 +415,175 @@ function stayAtInn() {
             default: true
         })
         .then(function (choice) {
-            if (player.gold >= cost) {
-                if (choice.isStaying === true) {
+            if (choice.isStaying === true) {
+                if (player.gold >= cost) {
                     player.gold -= cost;
                     player.hp = player.maxHp;
                     player.mp = player.maxMp;
                     console.log("\nYou feel well rested.\n")
                     goToTown();
                 } else {
-                    console.log("\nYou left.\n")
+                    console.log("\nYou cannot afford to stay here.\n")
                     goToTown();
                 }
             } else {
-                console.log("\nYou cannot afford to stay here.\n")
+                console.log("\nYou left.\n")
                 goToTown();
+
+            }
+        });
+}
+
+function shop() {
+    inquirer.prompt({
+            type: "list",
+            message: "What do you want to do?",
+            name: "action",
+            choices: ["Buy", "Sell", "< Go back"]
+        })
+        .then(function (choice) {
+            switch (choice.action) {
+                case "Buy":
+                    buy();
+                    break;
+
+                case "Sell":
+                    sell();
+                    break;
+
+                case "< Go back":
+                    goToTown();
+                    break;
+
+
+            };
+        })
+}
+
+function buy() {
+
+    isFighting = false;
+    isExploring = false;
+    isInTown = false;
+    isBuying = true;
+    isSelling = false;
+
+    inquirer.prompt({
+            type: "list",
+            message: "What do you want to buy?",
+            name: "action",
+            choices: shopInventory
+        })
+        .then(function (choice) {
+            switch (choice.action) {
+                case "< Go back":
+                    shop();;
+                    break;
+
+                case "Health potion":
+                    itemPurchase("Health potion", 5);
+                    break;
+
+                case "Mana potion":
+                    itemPurchase("Mana potion", 5)
+                    break;
+
+                case "Hat":
+                    itemPurchase("Hat", 100)
+                    break;
+
+
+            };
+        })
+}
+
+function itemPurchase(item, cost) {
+    console.log(item + " costs " + cost + " gold.")
+    inquirer.prompt({
+            type: "confirm",
+            name: "isBuying",
+            message: "Is that okay?",
+            default: true
+        })
+        .then(function (choice) {
+            if (choice.isBuying === true) {
+                if (player.gold >= cost) {
+                    player.gold -= cost;
+                    player.inventory.push(item);
+                    console.log("\nYou purchased a " + item + ".\n")
+                    gameStateCheck();
+
+                } else {
+                    console.log("\nYou cannot afford this item.\n")
+                    gameStateCheck();
+
+                }
+            } else {
+                console.log("\nYou decided against it.\n")
+                gameStateCheck();
+
+            }
+        });
+}
+
+function sell() {
+
+    isFighting = false;
+    isExploring = false;
+    isInTown = false;
+    isBuying = false;
+    isSelling = true;
+
+    inquirer.prompt({
+            type: "list",
+            message: "What do you want to sell?",
+            name: "action",
+            choices: player.inventory
+        })
+        .then(function (choice) {
+            switch (choice.action) {
+                case "< Go back":
+                    shop();;
+                    break;
+
+                case "Health potion":
+                    itemSell("Health potion", 3);
+                    break;
+
+                case "Mana potion":
+                    itemSell("Mana potion", 3)
+                    break;
+
+                case "Hat":
+                    itemSell("Hat", 100)
+                    break;
+
+
+            };
+        })
+
+}
+
+function itemSell(item, cost) {
+    console.log(item + " sells for " + cost + " gold.")
+    inquirer.prompt({
+            type: "confirm",
+            name: "isSelling",
+            message: "Is that okay?",
+            default: true
+        })
+        .then(function (choice) {
+            if (choice.isSelling === true) {
+
+                player.gold += cost;
+                removeItem(item, player.inventory);
+                console.log("\nYou sold a " + item + ".\n")
+                gameStateCheck();
+
+
+            } else {
+                console.log("\nYou decided against it.\n")
+                gameStateCheck();
 
             }
         });
@@ -439,7 +613,7 @@ function useItem() {
                             player.hp = player.maxHp;
                         }
 
-                        console.log("\nYou gained " + 10 + "\n")
+                        console.log("\nYou recovered " + 10 + "HP\n")
                         removeItem("Health potion", player.inventory);
                         gameStateCheck();
                     } else {
@@ -449,7 +623,7 @@ function useItem() {
 
                     break;
 
-                case "hat":
+                case "Hat":
                     console.log("\nIt looks good on you...\n")
 
                     gameStateCheck();
@@ -483,6 +657,24 @@ function gameOverCheck() {
     } else if (isExploring === true) {
         whereTo();
     }
+}
+
+function quit() {
+    inquirer.prompt({
+            type: "confirm",
+            name: "isQuiting",
+            message: "Are you sure you want to quit?",
+            default: true
+        })
+        .then(function (choice) {
+            if (choice.isQuiting === true) {
+                console.log("Good bye " + player.name + ".");
+            } else {
+                console.log("\nYou continued playing.\n")
+                gameStateCheck();
+
+            }
+        });
 }
 
 gameStart();
