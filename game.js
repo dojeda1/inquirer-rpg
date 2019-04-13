@@ -157,36 +157,35 @@ function CreateMonster(name, strength, speed, maxHp, maxMp, xp, gold, invArr) {
     this.gold = gold;
     this.isDead = false;
 
-    this.checkStats = function () {
-
-        console.log("\n");
-        console.log(" -- " + this.name + " -- ");
-        console.log("HP: " + this.hp + "/" + this.maxHp + "  |  MP: " + this.mp + "/" + this.maxMp + "  |  Strength: " + this.strength);
-        console.log("XP: " + this.xp);
-        console.log(" -- Inventory -- ");
-        console.log(this.inventory);
-        console.log("\n");
-    }
-
-    this.attack = function (opponent) {
-        var SpeedNum = this.speed - player.speed
-        var missCheck = randNum(1, SpeedNum)
-
-        if (missCheck != 1) {
-
-            var newStrength = this.strength - Math.floor(player.defense / 4)
-
-            opponent.hp -= newStrength;
-
-            console.log(this.name + " attacked you for " + newStrength + " damage.")
-            console.log("You have " + opponent.hp + " HP left.")
-        } else {
-            console.log(this.name + " missed!")
-        }
-
-    }
-
 };
+
+CreateMonster.prototype.checkStats = function () {
+    console.log("\n");
+    console.log(" -- " + this.name + " -- ");
+    console.log("HP: " + this.hp + "/" + this.maxHp + "  |  MP: " + this.mp + "/" + this.maxMp + "  |  Strength: " + this.strength);
+    console.log("XP: " + this.xp);
+    console.log(" -- Inventory -- ");
+    console.log(this.inventory);
+    console.log("\n");
+}
+
+CreateMonster.prototype.attack = function (opponent) {
+    var SpeedNum = this.speed - player.speed
+    var missCheck = randNum(1, SpeedNum)
+
+    if (missCheck != 1) {
+
+        var newStrength = this.strength - Math.floor(player.defense / 4)
+
+        opponent.hp -= newStrength;
+
+        console.log(this.name + " attacked you for " + newStrength + " damage.")
+        console.log("You have " + opponent.hp + " HP left.")
+    } else {
+        console.log(this.name + " missed!")
+    }
+
+}
 
 // create monsters
 var currentEnemy = {};
@@ -210,6 +209,7 @@ var dragon = new CreateMonster("Dragon", 16, 18, 40, 10, 40, 40, ["Health Potion
 monsters.push(dragon);
 
 // console.log("Monsters Available: " + monsters.length)
+// console.log(monsters)
 
 function gameStart() {
     inquirer
@@ -868,7 +868,7 @@ function useItem() {
 
                     break;
 
-                case "Hat":
+                case "Old Hat":
                     console.log("--------\n");
                     console.log("It looks good on you...")
                     console.log("--------\n");
