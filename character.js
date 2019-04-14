@@ -18,9 +18,9 @@ function CreateCharacter(name, race, profession) {
     this.name = this.nameStructure(name)
     this.race = race;
     this.profession = profession;
-    this.strength = 3;
+    this.strength = 4;
     this.defense = 2;
-    this.luck = 2;
+    this.luck = 3;
     this.speed = 2;
     this.maxHp = 4;
     this.hp = 4;
@@ -30,7 +30,7 @@ function CreateCharacter(name, race, profession) {
     this.xp = 0;
     this.nextLevel = 50;
     this.inventory = ["Health Potion"];
-    this.gold = 100;
+    this.gold = 0;
     this.goldCount = 0;
     this.killCount = 0;
     this.isDead = false;
@@ -84,7 +84,7 @@ function CreateCharacter(name, race, profession) {
             this.luck += 1;
             this.maxHp += 5;
             this.hp = this.maxHp;
-            this.maxMp += 4;
+            this.maxMp += 3;
             this.mp = this.maxMp;
             console.log("\nYou are now lv." + this.level + "!!!")
         }

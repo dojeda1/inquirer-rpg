@@ -316,13 +316,13 @@ function gameStart() {
                     break;
 
                 case "Rogue":
-                    player.maxHp += 0
-                    player.hp += 0
+                    player.maxHp += 2
+                    player.hp += 2
                     player.maxMp += 2
                     player.mp += 2
-                    player.strength += 0
+                    player.strength += 1
                     player.defense += 0
-                    player.speed += 1
+                    player.speed += 2
                     player.luck += 2
 
                     player.special = {
@@ -375,8 +375,8 @@ function gameStart() {
 
 
                 case "Mage":
-                    player.maxHp += 0
-                    player.hp += 0
+                    player.maxHp += 2
+                    player.hp += 2
                     player.maxMp += 4
                     player.mp += 4
                     player.strength += 0
@@ -442,7 +442,7 @@ function whereTo() {
             type: "list",
             message: "Where to next?",
             name: "action",
-            choices: ["Next battle", "Go to town", "Use item", "Check stats", "Quit"]
+            choices: ["Next battle", "Go to town", "Use Item", "Check Stats", "< Quit"]
         })
         .then(function (choice) {
             switch (choice.action) {
@@ -464,16 +464,16 @@ function whereTo() {
 
                     break;
 
-                case "Use item":
+                case "Use Item":
                     useItem();
                     break;
 
-                case "Check stats":
+                case "Check Stats":
                     player.checkStats();
                     whereTo();
                     break;
 
-                case "Quit":
+                case "< Quit":
                     quit();
                     break;
             }
@@ -541,7 +541,7 @@ function fight() {
             type: "list",
             message: "Next move?",
             name: "action",
-            choices: ["Attack", player.special.name, "Use item", "Check stats", "Run"]
+            choices: ["Attack", player.special.name, "Use Item", "Check Stats", "< Run"]
         })
         .then(function (choice) {
             switch (choice.action) {
@@ -556,18 +556,18 @@ function fight() {
                     player.special.move(currentEnemy);
                     break;
 
-                case "Use item":
+                case "Use Item":
 
                     useItem();
 
                     break;
 
-                case "Check stats":
+                case "Check Stats":
                     player.checkStats();
                     fight();
                     break;
 
-                case "Run":
+                case "< Run":
 
                     console.log("\n--------")
                     console.log("You Ran Away.")
@@ -624,7 +624,7 @@ function goToTown() {
             type: "list",
             message: "What next?",
             name: "action",
-            choices: ["Stay at Inn", "Go to shop", "Use item", "Check stats", "Leave town"]
+            choices: ["Stay at Inn", "Go to Shop", "Use Item", "Check Stats", "< Leave Town"]
         })
         .then(function (choice) {
             switch (choice.action) {
@@ -632,20 +632,20 @@ function goToTown() {
                     stayAtInn();
                     break;
 
-                case "Go to shop":
+                case "Go to Shop":
                     shop();
                     break;
 
-                case "Use item":
+                case "Use Item":
                     useItem();
                     break;
 
-                case "Check stats":
+                case "Check Stats":
                     player.checkStats();
                     goToTown();
                     break;
 
-                case "Leave town":
+                case "< Leave Town":
                     printBox("You went adventuring.")
                     whereTo();
                     break;
