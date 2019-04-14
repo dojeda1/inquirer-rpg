@@ -1,4 +1,6 @@
 var inquirer = require("inquirer");
+var CreateCharacter = require("./character.js");
+var CreateMonster = require("./monster.js");
 
 // gameplay stage variables
 var isInTown = false;
@@ -6,6 +8,8 @@ var isExploring = true;
 var isFighting = false;
 var isBuying = false;
 var isSelling = false;
+
+var wasAmbushed = false;
 // console.log("f-" + isFighting + " E-" + isExploring + " t-" + isInTown);
 
 function gameStateCheck() {
@@ -23,24 +27,20 @@ function gameStateCheck() {
     }
 }
 
-function nameStructure(roughName) {
-    if (roughName != "") {
-        var newName = roughName.trim();
-        newName = newName.charAt(0).toUpperCase() + newName.slice(1);
-
-    } else {
-        var newName = "Thomas"
-    }
-    return newName;
-}
-
 function randNum(x, y) {
     return Math.floor(Math.random() * y) + x
+}
+
+function printBox(text) {
+    console.log("\n--------")
+    console.log(text)
+    console.log("--------")
 }
 
 function dropGold() {
     var amount = randNum(0, currentEnemy.gold);
     player.gold += amount;
+    player.goldCount += amount;
     console.log(currentEnemy.name + " dropped " + amount + " gold.")
 }
 
@@ -68,150 +68,36 @@ function runLoss() {
 var shopInventory = ["< Go back", "Health Potion", "Mana Potion", "Old Hat"];
 
 // character creators
-function CreateCharacter(name, race, profession) {
 
-    this.name = nameStructure(name)
-    this.race = race;
-    this.profession = profession;
-    this.strength = 4;
-    this.defense = 4;
-    this.luck = 4;
-    this.speed = 4;
-    this.maxHp = 4;
-    this.hp = 4;
-    this.maxMp = 4;
-    this.mp = 4;
-    this.level = 1;
-    this.xp = 0;
-    this.nextLevel = 40;
-    this.inventory = ["< Go back", "Health Potion", "Mana Potion", "Old Hat"];
-    this.gold = 0;
-    this.killCount = 0;
-    this.isDead = false;
 
-    this.checkStats = function () {
 
-        console.log("\n");
-        console.log(" -- " + this.name + " -- ");
-        console.log("lv." + this.level + " " + this.race + " " + this.profession);
-        console.log("HP: " + this.hp + "/" + this.maxHp + "  |  MP: " + this.mp + "/" + this.maxMp);
-        console.log("ATK: " + this.strength + "  |  DEF: " + this.defense + "  |  SPD: " + this.speed + "  |  LUCK: " + this.luck);
-        console.log("XP: " + this.xp + " | to next level: " + (this.nextLevel - this.xp));
-        console.log("Gold: " + this.gold);
-        console.log(" -- Inventory -- ");
-        console.log(this.inventory.slice(1));
-        console.log("\n");
-    }
-
-    this.attack = function (opponent) {
-
-        var luckCheck = opponent.speed - this.luck
-        var criticalCheck = randNum(1, luckCheck)
-        if (criticalCheck != 1) {
-            opponent.hp -= this.strength;
-            console.log("You attacked " + opponent.name + " for " + this.strength + " damage.")
-            console.log(opponent.name + " has " + opponent.hp + " HP left.")
-        } else {
-            var newStrength = this.strength + Math.floor(this.strength / 2);
-            opponent.hp -= newStrength;
-            console.log("Critical hit for " + newStrength + " damage!!!")
-            console.log(opponent.name + " has " + opponent.hp + " HP left.")
-        }
-    }
-
-    this.levelUp = function () {
-        if (this.xp >= this.nextLevel) {
-            this.level++;
-            this.nextLevel += this.level * 30;
-            this.strength += 2;
-            this.defense += 1;
-            this.speed += 1;
-            this.luck += 1;
-            this.maxHp += 5;
-            this.hp = this.maxHp;
-            this.maxMp += 4;
-            this.mp = this.maxMp;
-            console.log("\nYou are now lv." + this.level + "!!!")
-        }
-    }
-
-    this.gainXp = function (opponent) {
-        this.xp += opponent.xp;
-        console.log("You gained " + opponent.xp + " XP.");
-        console.log("Total XP: " + this.xp);
-    }
-
-};
-
-function CreateMonster(name, strength, speed, maxHp, maxMp, xp, gold, invArr) {
-
-    this.name = name
-    this.strength = strength;
-    this.speed = speed;
-    this.maxHp = maxHp;
-    this.hp = maxHp;
-    this.maxMp = maxMp;
-    this.mp = maxMp;
-    this.xp = xp;
-    this.inventory = invArr;
-    this.gold = gold;
-    this.isDead = false;
-
-};
-
-CreateMonster.prototype.checkStats = function () {
-    console.log("\n");
-    console.log(" -- " + this.name + " -- ");
-    console.log("HP: " + this.hp + "/" + this.maxHp + "  |  MP: " + this.mp + "/" + this.maxMp + "  |  Strength: " + this.strength);
-    console.log("XP: " + this.xp);
-    console.log(" -- Inventory -- ");
-    console.log(this.inventory);
-    console.log("\n");
-}
-
-CreateMonster.prototype.attack = function (opponent) {
-    var SpeedNum = this.speed - player.speed
-    var missCheck = randNum(1, SpeedNum)
-
-    if (missCheck != 1) {
-
-        var newStrength = this.strength - Math.floor(player.defense / 4)
-
-        opponent.hp -= newStrength;
-
-        console.log(this.name + " attacked you for " + newStrength + " damage.")
-        console.log("You have " + opponent.hp + " HP left.")
-    } else {
-        console.log(this.name + " missed!")
-    }
-
-}
 
 // create monsters
 var currentEnemy = {};
 monsters = []
 //                            name, strength, speed, maxHp, maxMp, xp, gold, invArr
-var slime = new CreateMonster("Slime", 3, 10, 10, 0, 10, 10, ["Health Potion", "Old Hat"]);
+var slime = new CreateMonster("Slime", 3, 12, 10, 0, 10, 10, ["Health Potion", "Old Hat"]);
 monsters.push(slime);
-var wolf = new CreateMonster("Wolf", 5, 15, 12, 0, 12, 12, ["Health Potion"]);
+var wolf = new CreateMonster("Wolf", 6, 15, 12, 0, 12, 12, ["Health Potion"]);
 monsters.push(wolf);
-var goblin = new CreateMonster("Goblin", 6, 12, 15, 0, 15, 15, ["Health Potion"]);
+var goblin = new CreateMonster("Goblin", 9, 16, 15, 0, 15, 15, ["Health Potion"]);
 monsters.push(goblin);
-var orc = new CreateMonster("Orc", 8, 18, 20, 0, 20, 20, ["Health Potion"]);
+var orc = new CreateMonster("Orc", 10, 20, 20, 0, 20, 20, ["Health Potion"]);
 monsters.push(orc);
-var ogre = new CreateMonster("Ogre", 10, 12, 25, 0, 25, 25, ["Health Potion"]);
+var ogre = new CreateMonster("Ogre", 15, 15, 25, 0, 25, 25, ["Health Potion"]);
 monsters.push(ogre);
-var giant = new CreateMonster("Giant", 15, 10, 30, 10, 30, 30, ["Health Potion"]);
+var giant = new CreateMonster("Giant", 20, 12, 30, 10, 30, 30, ["Health Potion"]);
 monsters.push(giant);
-var demon = new CreateMonster("Demon", 15, 20, 35, 10, 35, 35, ["Health Potion"]);
+var demon = new CreateMonster("Demon", 25, 25, 35, 10, 35, 35, ["Health Potion"]);
 monsters.push(demon);
-var dragon = new CreateMonster("Dragon", 16, 18, 40, 10, 40, 40, ["Health Potion"]);
+var dragon = new CreateMonster("Dragon", 30, 20, 50, 10, 40, 40, ["Health Potion"]);
 monsters.push(dragon);
 
 // console.log("Monsters Available: " + monsters.length)
 // console.log(monsters)
 
 function gameStart() {
+    console.log("\n")
     inquirer
         .prompt([{
                 type: "input",
@@ -287,32 +173,43 @@ function gameStart() {
                     player.luck += 0
 
                     player.special = {
-                        name: "Fireball",
+                        name: "Berserk",
                         mpCost: 6,
 
-                        move: function (opponent) {
+                        move: function () {
+
                             if (player.special.mpCost <= player.mp) {
-                                player.mp -= player.special.mpCost;
-                                var luckCheck = (2 + opponent.speed - player.luck)
-                                var criticalCheck = randNum(1, luckCheck);
-                                var magicStrength = player.strength + Math.floor(player.maxMp / 3)
 
-                                if (criticalCheck != 1) {
+                                if (player.isBerserk === false) {
 
-                                    opponent.hp -= magicStrength;
-                                    console.log("Your flames hit " + opponent.name + " for " + magicStrength + " damage.")
-                                    console.log(opponent.name + " has " + opponent.hp + " HP left.")
-                                    enemyDeathCheck();
+                                    player.isBerserk = true
+                                    player.berserkCount = 0
+                                    player.berserkAtkHold = player.strength;
+
+                                    player.mp -= player.special.mpCost;
+
+                                    var luckCheck = (20 - player.luck)
+                                    var criticalCheck = randNum(1, luckCheck);
+
+                                    if (criticalCheck === 1) {
+
+                                        player.strength = player.strength * 2;
+
+                                        console.log("Your strength temporarily doubled!")
+                                        enemyDeathCheck();
+                                    } else {
+                                        player.strength = Math.floor(player.strength * 1.5);
+                                        console.log("Your strength temporarily increased.")
+                                        enemyDeathCheck();
+                                    }
                                 } else {
-                                    var newStrength = magicStrength + Math.floor(magicStrength / 2);
-                                    opponent.hp -= newStrength;
-                                    console.log("Critical hit for " + newStrength + " damage!!!");
-                                    console.log(opponent.name + " has " + opponent.hp + " HP left.");
-                                    enemyDeathCheck();
+                                    console.log("You are already Berserk.");
+                                    console.log("--------");
+                                    gameOverCheck()
                                 }
                             } else {
                                 console.log("You do not have enough MP to perform this move.");
-                                console.log("--------\n");
+                                console.log("--------");
                                 gameOverCheck();
                             }
                         }
@@ -355,15 +252,17 @@ function gameStart() {
 
                                     player.inventory.push(stealItem);
                                     console.log("You stole " + anA + " " + stealItem + "!")
+                                    console.log("--------");
 
                                     enemyDeathCheck();
                                 } else {
                                     console.log("You didn't steal anything...")
+                                    console.log("--------");
                                     enemyDeathCheck();
                                 }
                             } else {
                                 console.log("You do not have enough MP to perform this move.");
-                                console.log("--------\n");
+                                console.log("--------");
                                 gameOverCheck();
                             }
                         }
@@ -431,8 +330,11 @@ function whereTo() {
     isInTown = false;
     isBuying = false;
     isSelling = false;
+
+    wasAmbushed = false;
     // console.log("f-" + isFighting + " E-" + isExploring + " t-" + isInTown);
 
+    player.quickCheck();
     inquirer.prompt({
             type: "list",
             message: "Where to next?",
@@ -450,10 +352,10 @@ function whereTo() {
 
                     var safeTripCheck = randNum(1, player.luck)
                     if (safeTripCheck != 1) {
-                        console.log("\nYou got to town safely.\n")
+                        printBox("You got to town safely.")
                         goToTown();
                     } else {
-                        console.log("\nYou have been ambushed!");
+                        wasAmbushed = true
                         monsterEncounter();
                     }
 
@@ -505,14 +407,20 @@ function monsterEncounter() {
         anA = "a";
     }
 
-    console.log("\nYou encountered " + anA + " " + currentEnemy.name + ".")
-    console.log("HP: " + currentEnemy.hp + "/" + currentEnemy.maxHp + "  |  MP: " + currentEnemy.mp + "/" + currentEnemy.maxMp + "  |  Strength: " + currentEnemy.strength + "\n");
-
+    console.log("\n--------")
+    if (wasAmbushed === false) {
+        console.log("You encountered " + anA + " " + currentEnemy.name + ".")
+    } else {
+        console.log("You have been ambushed by " + anA + " " + currentEnemy.name + "!!!")
+    }
+    console.log("HP: " + currentEnemy.hp + "/" + currentEnemy.maxHp + "  |  MP: " + currentEnemy.mp + "/" + currentEnemy.maxMp + "  |  Strength: " + currentEnemy.strength);
+    console.log("--------")
     fight();
 
 }
 
 function fight() {
+    player.quickCheck();
     inquirer.prompt({
             type: "list",
             message: "Next move?",
@@ -548,7 +456,7 @@ function fight() {
                     console.log("\n--------")
                     console.log("You Ran Away.")
                     runLoss();
-                    console.log("--------\n")
+                    console.log("--------")
                     gameOverCheck();
 
                     break;
@@ -558,20 +466,20 @@ function fight() {
 
 function enemyDeathCheck() {
     if (currentEnemy.hp <= 0) {
-        console.log("You killed " + currentEnemy.name + ".\n");
+        console.log("You killed " + currentEnemy.name + "!\n");
         player.killCount++;
         dropGold();
         player.gainXp(currentEnemy);
         player.levelUp();
         currentEnemy.hp = currentEnemy.maxHp;
         currentEnemy.mp = currentEnemy.maxMp;
-        console.log("--------\n");
+        console.log("--------");
 
         whereTo();
 
     } else {
         currentEnemy.attack(player);
-        console.log("--------\n")
+        console.log("--------")
 
         gameOverCheck();
 
@@ -586,7 +494,7 @@ function goToTown() {
     isBuying = false;
     isSelling = false;
     // console.log("f-" + isFighting + " e-" + isExploring + " T-" + isInTown);
-
+    player.quickCheck();
     inquirer.prompt({
             type: "list",
             message: "What next?",
@@ -613,6 +521,7 @@ function goToTown() {
                     break;
 
                 case "Leave town":
+                    printBox("You went adventuring.")
                     whereTo();
                     break;
             };
@@ -623,7 +532,9 @@ function goToTown() {
 
 function stayAtInn() {
     var cost = 10 + (player.level - 1) * 2;
-    console.log("Staying the night will cost " + cost + " gold.")
+    printBox("Staying the night will cost " + cost + " gold.")
+
+    player.quickCheck();
     inquirer.prompt({
             type: "confirm",
             name: "isStaying",
@@ -636,14 +547,14 @@ function stayAtInn() {
                     player.gold -= cost;
                     player.hp = player.maxHp;
                     player.mp = player.maxMp;
-                    console.log("\nYou feel well rested.\n")
+                    printBox("You feel well rested.")
                     goToTown();
                 } else {
-                    console.log("\nYou cannot afford to stay here.\n")
+                    printBox("You cannot afford to stay here.")
                     goToTown();
                 }
             } else {
-                console.log("\nYou left.\n")
+                printBox("You left.")
                 goToTown();
 
             }
@@ -651,6 +562,8 @@ function stayAtInn() {
 }
 
 function shop() {
+
+    player.quickCheck();
     inquirer.prompt({
             type: "list",
             message: "What do you want to do?",
@@ -684,6 +597,7 @@ function buy() {
     isBuying = true;
     isSelling = false;
 
+    player.quickCheck();
     inquirer.prompt({
             type: "list",
             message: "What do you want to buy?",
@@ -715,6 +629,8 @@ function buy() {
 
 function itemPurchase(item, cost) {
     console.log(item + " costs " + cost + " gold.")
+
+    player.quickCheck();
     inquirer.prompt({
             type: "confirm",
             name: "isBuying",
@@ -726,16 +642,16 @@ function itemPurchase(item, cost) {
                 if (player.gold >= cost) {
                     player.gold -= cost;
                     player.inventory.push(item);
-                    console.log("\nYou purchased a " + item + ".\n")
+                    printBox("You purchased a " + item + ".")
                     gameStateCheck();
 
                 } else {
-                    console.log("\nYou cannot afford this item.\n")
+                    printBox("You cannot afford this item.")
                     gameStateCheck();
 
                 }
             } else {
-                console.log("\nYou decided against it.\n")
+                printBox("You decided against it.")
                 gameStateCheck();
 
             }
@@ -750,6 +666,7 @@ function sell() {
     isBuying = false;
     isSelling = true;
 
+    player.quickCheck();
     inquirer.prompt({
             type: "list",
             message: "What do you want to sell?",
@@ -782,6 +699,8 @@ function sell() {
 
 function itemSell(item, cost) {
     console.log(item + " sells for " + cost + " gold.")
+
+    player.quickCheck();
     inquirer.prompt({
             type: "confirm",
             name: "isSelling",
@@ -792,13 +711,14 @@ function itemSell(item, cost) {
             if (choice.isSelling === true) {
 
                 player.gold += cost;
+                player.goldCount += cost;
                 removeItem(item, player.inventory);
-                console.log("\nYou sold a " + item + ".\n")
+                printBox("You sold a " + item + ".")
                 gameStateCheck();
 
 
             } else {
-                console.log("\nYou decided against it.\n")
+                printBox("You decided against it.")
                 gameStateCheck();
 
             }
@@ -806,6 +726,8 @@ function itemSell(item, cost) {
 }
 
 function useItem() {
+
+    player.quickCheck();
     inquirer.prompt({
             type: "list",
             message: "What do you want to use?",
@@ -836,10 +758,10 @@ function useItem() {
                         if (isFighting === true) {
                             currentEnemy.attack(player);
                         }
-                        console.log("--------\n");
+                        console.log("--------");
                         gameStateCheck();
                     } else {
-                        console.log("\nYou are already at full Health.\n")
+                        printBox("You are already at full Health.")
                         gameStateCheck();
                     }
 
@@ -859,20 +781,17 @@ function useItem() {
                         if (isFighting === true) {
                             currentEnemy.attack(player);
                         }
-                        console.log("--------\n");
+                        console.log("--------");
                         gameStateCheck();
                     } else {
-                        console.log("\nYou are already at full Mana.\n")
+                        printBox("You are already at full Mana.")
                         gameStateCheck();
                     }
 
                     break;
 
                 case "Old Hat":
-                    console.log("--------\n");
-                    console.log("It looks good on you...")
-                    console.log("--------\n");
-
+                    printBox("It looks good on you...")
                     gameStateCheck();
 
                     break;
@@ -894,11 +813,12 @@ function gameOverCheck() {
     if (player.hp <= 0) {
 
         console.log("\n--------")
-        console.log(currentEnemy.name + " has Killed you.\n");
-        console.log(player.name + " reached lv." + player.level);
-        console.log("and killed " + player.killCount + " monsters.\n")
+        console.log(currentEnemy.name + " has killed you.\n");
+        console.log(player.name + " reached lv." + player.level + ".");
+        console.log(player.killCount + " monsters killed.")
+        console.log(player.goldCount + " gold earned.\n")
         console.log(" -- GAME OVER -- ");
-        console.log("--------\n")
+        console.log("--------")
     } else if (isFighting === true) {
         fight();
     } else if (isExploring === true) {
@@ -915,9 +835,9 @@ function quit() {
         })
         .then(function (choice) {
             if (choice.isQuiting === true) {
-                console.log("Good bye " + player.name + ".");
+                printBox("Good bye " + player.name + ".")
             } else {
-                console.log("\nYou continued playing.\n")
+                printBox("You continued playing.")
                 gameStateCheck();
 
             }
