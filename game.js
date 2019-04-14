@@ -1,6 +1,7 @@
 var inquirer = require("inquirer");
 var CreateCharacter = require("./character.js");
 var CreateMonster = require("./monster.js");
+var CreateItem = require("./items.js")
 
 // gameplay stage variables
 var isInTown = false;
@@ -10,6 +11,8 @@ var isBuying = false;
 var isSelling = false;
 
 var wasAmbushed = false;
+
+
 // console.log("f-" + isFighting + " E-" + isExploring + " t-" + isInTown);
 
 function gameStateCheck() {
@@ -65,32 +68,126 @@ function runLoss() {
 
 }
 
-var shopInventory = ["< Go back", "Health Potion", "Mana Potion", "Old Hat"];
-
-// character creators
 
 
+// create items
+var items = [];
+var items
+//                         name, buyCost, sellCost, effectNum
+var hPot = new CreateItem("Health Potion", 10, 5, 10)
+hPot.effect = function (user) {
+
+    if (user.hp < user.maxHp) {
+        user.hp += hPot.effectNum
+        if (user.hp > user.maxHp) {
+            user.hp = user.maxHp;
+        }
+
+        console.log("\n--------");
+        if (user.name === player.name) {
+            console.log("You recovered " + hPot.effectNum + " HP")
+        } else {
+            console.log(user.name + " recovered " + hPot.effectNum + " HP")
+        }
+
+        removeItem(hPot.name, user.inventory);
+
+        if (isFighting === true && user.name === player.name) {
+            currentEnemy.attack(user);
+        }
+        console.log("--------");
+        gameStateCheck();
+    } else {
+        printBox("You are already at full Health.")
+        gameStateCheck();
+    }
+};
+
+var megaHPot = new CreateItem("Mega Health Potion", 25, 15, 20)
+megaHPot.effect = function (user) {
+
+    if (user.hp < user.maxHp) {
+        user.hp += megaHPot.effectNum
+        if (user.hp > user.maxHp) {
+            user.hp = user.maxHp;
+        }
+
+        console.log("\n--------");
+        if (user.name === player.name) {
+            console.log("You recovered " + megaHPot.effectNum + " HP")
+        } else {
+            console.log(user.name + " recovered " + megaHPot.effectNum + " HP")
+        }
+
+        removeItem(megaHPot.name, user.inventory);
+
+        if (isFighting === true && user.name === player.name) {
+            currentEnemy.attack(user);
+        }
+        console.log("--------");
+        gameStateCheck();
+    } else {
+        printBox("You are already at full Health.")
+        gameStateCheck();
+    }
+};
+
+var mPot = new CreateItem("Mana Potion", 10, 5, 8)
+mPot.effect = function (user) {
+
+    if (user.mp < user.maxMp) {
+        user.mp += mPot.effectNum
+        if (user.mp > user.maxMp) {
+            user.mp = user.maxMp;
+        }
+        console.log("\n--------");
+        if (user.name === user.name) {
+            console.log("You recovered " + mPot.effectNum + " MP")
+        } else {
+            console.log(user.name + " recovered " + mPot.effectNum + " MP")
+        }
+
+        removeItem(mPot.name, user.inventory);
+
+        if (isFighting === true && user.name === player.name) {
+            currentEnemy.attack(player);
+        }
+        console.log("--------");
+        gameStateCheck();
+    } else {
+        printBox("You are already at full Mana.")
+        gameStateCheck();
+    }
+}
+
+var oldHat = new CreateItem("Old Hat", 100, 100, 0);
+oldHat.effect = function () {
+    printBox("It looks good on you...")
+    gameStateCheck();
+}
 
 
+var shopInventory = [hPot.name, mPot.name, oldHat.name, megaHPot.name];
 // create monsters
-var currentEnemy = {};
+
 monsters = []
-//                            name, strength, speed, maxHp, maxMp, xp, gold, invArr
-var slime = new CreateMonster("Slime", 3, 12, 10, 0, 10, 10, ["Health Potion", "Old Hat"]);
+var currentEnemy = new CreateMonster("", 0, 0, 0, 0, 0, 0, [])
+//                            name, maxHp, maxMp, strength, speed, xp, gold, invArr
+var slime = new CreateMonster("Slime", 10, 0, 3, 12, 10, 10, [mPot.name]);
 monsters.push(slime);
-var wolf = new CreateMonster("Wolf", 6, 15, 12, 0, 12, 12, ["Health Potion"]);
+var wolf = new CreateMonster("Wolf", 12, 0, 6, 15, 12, 12, [mPot.name]);
 monsters.push(wolf);
-var goblin = new CreateMonster("Goblin", 9, 16, 15, 0, 15, 15, ["Health Potion"]);
+var goblin = new CreateMonster("Goblin", 15, 0, 9, 16, 15, 15, [hPot.name, oldHat.name]);
 monsters.push(goblin);
-var orc = new CreateMonster("Orc", 10, 20, 20, 0, 20, 20, ["Health Potion"]);
+var orc = new CreateMonster("Orc", 20, 0, 10, 20, 20, 20, [hPot.name]);
 monsters.push(orc);
-var ogre = new CreateMonster("Ogre", 15, 15, 25, 0, 25, 25, ["Health Potion"]);
+var ogre = new CreateMonster("Ogre", 25, 0, 15, 15, 25, 25, [megaHPot.name]);
 monsters.push(ogre);
-var giant = new CreateMonster("Giant", 20, 12, 30, 10, 30, 30, ["Health Potion"]);
+var giant = new CreateMonster("Giant", 30, 10, 20, 12, 30, 30, [megaHPot.name]);
 monsters.push(giant);
-var demon = new CreateMonster("Demon", 25, 25, 35, 10, 35, 35, ["Health Potion"]);
+var demon = new CreateMonster("Demon", 35, 10, 25, 25, 35, 35, [hPot.name]);
 monsters.push(demon);
-var dragon = new CreateMonster("Dragon", 30, 20, 50, 10, 40, 40, ["Health Potion"]);
+var dragon = new CreateMonster("Dragon", 50, 10, 30, 20, 40, 40, [hPot.name, oldHat.name]);
 monsters.push(dragon);
 
 // console.log("Monsters Available: " + monsters.length)
@@ -231,37 +328,41 @@ function gameStart() {
                         mpCost: 4,
 
                         move: function (opponent) {
-                            if (player.special.mpCost <= player.mp) {
-                                player.mp -= player.special.mpCost;
-                                var luckCheck = (opponent.speed - player.luck)
-                                var stealCheck = randNum(1, luckCheck);
+                            if (currentEnemy.inventory.length != 0) {
+                                if (player.special.mpCost <= player.mp) {
+                                    player.mp -= player.special.mpCost;
+                                    var luckCheck = (opponent.speed - player.luck)
+                                    var stealCheck = randNum(1, luckCheck);
 
-                                if (stealCheck <= 8) {
+                                    if (stealCheck <= 8) {
 
-                                    var monsterIndex = randNum(0, currentEnemy.inventory.length);
-                                    var stealItem = currentEnemy.inventory[monsterIndex];
+                                        var monsterIndex = randNum(0, currentEnemy.inventory.length);
+                                        var stealItem = currentEnemy.inventory[monsterIndex];
 
-                                    var firstLetter = stealItem.charAt(0);
+                                        var firstLetter = stealItem.charAt(0);
 
-                                    var anA = "a";
-                                    if (firstLetter === "A" || firstLetter === "E" || firstLetter === "I" || firstLetter === "O" || firstLetter === "U") {
-                                        anA = "an";
+                                        var anA = "a";
+                                        if (firstLetter === "A" || firstLetter === "E" || firstLetter === "I" || firstLetter === "O" || firstLetter === "U") {
+                                            anA = "an";
+                                        } else {
+                                            anA = "a";
+                                        }
+                                        removeItem(stealItem, currentEnemy.inventory);
+                                        player.inventory.push(stealItem);
+                                        console.log("You stole " + anA + " " + stealItem + "!\n")
+
+                                        enemyDeathCheck();
                                     } else {
-                                        anA = "a";
+                                        console.log("You failed to steal anything...")
+                                        enemyDeathCheck();
                                     }
-
-                                    player.inventory.push(stealItem);
-                                    console.log("You stole " + anA + " " + stealItem + "!")
-                                    console.log("--------");
-
-                                    enemyDeathCheck();
                                 } else {
-                                    console.log("You didn't steal anything...")
+                                    console.log("You do not have enough MP to perform this move.");
                                     console.log("--------");
-                                    enemyDeathCheck();
+                                    gameOverCheck();
                                 }
                             } else {
-                                console.log("You do not have enough MP to perform this move.");
+                                console.log("There is nothing left to steal.");
                                 console.log("--------");
                                 gameOverCheck();
                             }
@@ -397,8 +498,21 @@ function monsterEncounter() {
         floorNum = 0;
         rangeNum = player.level;
     }
+
     var monNum = randNum(floorNum, rangeNum)
-    currentEnemy = monsters[monNum];
+    //  name, maxHp, maxMp, strength, speed, xp, gold, invArr
+    currentEnemy.name = monsters[monNum].name;
+    currentEnemy.maxHp = monsters[monNum].maxHp;
+    currentEnemy.hp = monsters[monNum].hp;
+    currentEnemy.maxMp = monsters[monNum].maxMp;
+    currentEnemy.mp = monsters[monNum].mp;
+    currentEnemy.strength = monsters[monNum].strength;
+    currentEnemy.xp = monsters[monNum].xp;
+    currentEnemy.inventory = Array.from(monsters[monNum].inventory);
+    currentEnemy.gold = monsters[monNum].gold;
+    currentEnemy.isDead = monsters[monNum].isDead;
+
+
     var firstLetter = currentEnemy.name.charAt(0);
     var anA = "a";
     if (firstLetter === "A" || firstLetter === "E" || firstLetter === "I" || firstLetter === "O" || firstLetter === "U") {
@@ -471,8 +585,7 @@ function enemyDeathCheck() {
         dropGold();
         player.gainXp(currentEnemy);
         player.levelUp();
-        currentEnemy.hp = currentEnemy.maxHp;
-        currentEnemy.mp = currentEnemy.maxMp;
+
         console.log("--------");
 
         whereTo();
@@ -597,6 +710,8 @@ function buy() {
     isBuying = true;
     isSelling = false;
 
+    shopInventory.push("< Go Back")
+
     player.quickCheck();
     inquirer.prompt({
             type: "list",
@@ -605,21 +720,26 @@ function buy() {
             choices: shopInventory
         })
         .then(function (choice) {
+            removeItem("< Go Back", shopInventory);
             switch (choice.action) {
-                case "< Go back":
+                case "< Go Back":
                     shop();;
                     break;
 
-                case "Health Potion":
-                    itemPurchase("Health Potion", 5);
+                case hPot.name:
+                    itemPurchase(hPot.name, hPot.buyCost);
                     break;
 
-                case "Mana Potion":
-                    itemPurchase("Mana Potion", 5)
+                case megaHPot.name:
+                    itemPurchase(megaHPot.name, megaHPot.buyCost);
                     break;
 
-                case "Old Hat":
-                    itemPurchase("Old Hat", 100)
+                case mPot.name:
+                    itemPurchase(mPot.name, hPot.buyCost)
+                    break;
+
+                case oldHat.name:
+                    itemPurchase(oldHat.name, oldHat.buyCost)
                     break;
 
 
@@ -628,7 +748,7 @@ function buy() {
 }
 
 function itemPurchase(item, cost) {
-    console.log(item + " costs " + cost + " gold.")
+    printBox(item + " costs " + cost + " gold.")
 
     player.quickCheck();
     inquirer.prompt({
@@ -642,6 +762,7 @@ function itemPurchase(item, cost) {
                 if (player.gold >= cost) {
                     player.gold -= cost;
                     player.inventory.push(item);
+                    removeItem(item, shopInventory);
                     printBox("You purchased a " + item + ".")
                     gameStateCheck();
 
@@ -666,6 +787,8 @@ function sell() {
     isBuying = false;
     isSelling = true;
 
+    player.inventory.push("< Go Back")
+
     player.quickCheck();
     inquirer.prompt({
             type: "list",
@@ -674,21 +797,27 @@ function sell() {
             choices: player.inventory
         })
         .then(function (choice) {
+            removeItem("< Go Back", player.inventory);
             switch (choice.action) {
-                case "< Go back":
+
+                case "< Go Back":
                     shop();;
                     break;
 
-                case "Health Potion":
-                    itemSell("Health Potion", 3);
+                case hPot.name:
+                    itemSell(hPot.name, hPot.sellCost);
                     break;
 
-                case "Mana Potion":
-                    itemSell("Mana Potion", 3)
+                case megaHPot.name:
+                    itemSell(megaHPot.name, megaHPot.sellCost);
                     break;
 
-                case "Old Hat":
-                    itemSell("Old Hat", 100)
+                case mPot.name:
+                    itemSell(mPot.name, mPot.sellCost)
+                    break;
+
+                case oldHat.name:
+                    itemSell(oldHat.name, oldHat.sellCost)
                     break;
 
 
@@ -713,6 +842,7 @@ function itemSell(item, cost) {
                 player.gold += cost;
                 player.goldCount += cost;
                 removeItem(item, player.inventory);
+                shopInventory.push(item);
                 printBox("You sold a " + item + ".")
                 gameStateCheck();
 
@@ -727,6 +857,8 @@ function itemSell(item, cost) {
 
 function useItem() {
 
+    player.inventory.push("< Go Back")
+
     player.quickCheck();
     inquirer.prompt({
             type: "list",
@@ -735,65 +867,27 @@ function useItem() {
             choices: player.inventory
         })
         .then(function (choice) {
+            removeItem("< Go Back", player.inventory);
             switch (choice.action) {
 
-                case "< Go back":
-
+                case "< Go Back":
                     gameStateCheck();
-
                     break;
 
-                case "Health Potion":
-
-                    if (player.hp < player.maxHp) {
-                        player.hp += 10
-                        if (player.hp > player.maxHp) {
-                            player.hp = player.maxHp;
-                        }
-
-                        console.log("\n--------");
-                        console.log("You recovered " + 10 + " HP")
-                        removeItem("Health Potion", player.inventory);
-
-                        if (isFighting === true) {
-                            currentEnemy.attack(player);
-                        }
-                        console.log("--------");
-                        gameStateCheck();
-                    } else {
-                        printBox("You are already at full Health.")
-                        gameStateCheck();
-                    }
-
+                case hPot.name:
+                    hPot.effect(player);
                     break;
 
-                case "Mana Potion":
-
-                    if (player.mp < player.maxMp) {
-                        player.mp += 10
-                        if (player.mp > player.maxMp) {
-                            player.mp = player.maxMp;
-                        }
-                        console.log("\n--------");
-                        console.log("You recovered " + 8 + " MP")
-                        removeItem("Mana Potion", player.inventory);
-
-                        if (isFighting === true) {
-                            currentEnemy.attack(player);
-                        }
-                        console.log("--------");
-                        gameStateCheck();
-                    } else {
-                        printBox("You are already at full Mana.")
-                        gameStateCheck();
-                    }
-
+                case megaHPot.name:
+                    megaHPot.effect(player);
                     break;
 
-                case "Old Hat":
-                    printBox("It looks good on you...")
-                    gameStateCheck();
+                case mPot.name:
+                    mPot.effect(player);
+                    break;
 
+                case oldHat.name:
+                    oldHat.effect();
                     break;
 
             };
@@ -815,7 +909,11 @@ function gameOverCheck() {
         console.log("\n--------")
         console.log(currentEnemy.name + " has killed you.\n");
         console.log(player.name + " reached lv." + player.level + ".");
-        console.log(player.killCount + " monsters killed.")
+        if (player.killcount != 1) {
+            console.log(player.killCount + " monsters killed.")
+        } else {
+            console.log(player.killCount + " monster killed.")
+        }
         console.log(player.goldCount + " gold earned.\n")
         console.log(" -- GAME OVER -- ");
         console.log("--------")

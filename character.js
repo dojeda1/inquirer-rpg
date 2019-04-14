@@ -22,15 +22,15 @@ function CreateCharacter(name, race, profession) {
     this.defense = 2;
     this.luck = 2;
     this.speed = 2;
-    this.maxHp = 2;
-    this.hp = 2
-    this.maxMp = 2;
-    this.mp = 2;
+    this.maxHp = 4;
+    this.hp = 4;
+    this.maxMp = 4;
+    this.mp = 4;
     this.level = 1;
     this.xp = 0;
     this.nextLevel = 50;
-    this.inventory = ["< Go back", "Health Potion", "Mana Potion", "Old Hat"];
-    this.gold = 0;
+    this.inventory = ["Health Potion"];
+    this.gold = 100;
     this.goldCount = 0;
     this.killCount = 0;
     this.isDead = false;
@@ -48,7 +48,7 @@ function CreateCharacter(name, race, profession) {
         console.log("XP: " + this.xp + " | to next level: " + (this.nextLevel - this.xp));
         console.log("Gold: " + this.gold);
         console.log(" -- Inventory -- ");
-        console.log(this.inventory.slice(1));
+        console.log(this.inventory);
     }
 
     this.quickCheck = function () {

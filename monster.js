@@ -1,16 +1,18 @@
-function CreateMonster(name, strength, speed, maxHp, maxMp, xp, gold, invArr) {
+function CreateMonster(name, maxHp, maxMp, strength, speed, xp, gold, invArr) {
 
     this.name = name
-    this.strength = strength;
-    this.speed = speed;
     this.maxHp = maxHp;
     this.hp = maxHp;
     this.maxMp = maxMp;
     this.mp = maxMp;
+    this.strength = strength;
+    this.speed = speed;
     this.xp = xp;
     this.inventory = invArr;
     this.gold = gold;
     this.isDead = false;
+
+
 
 };
 
@@ -34,7 +36,7 @@ CreateMonster.prototype.attack = function (opponent) {
 
     if (missCheck != 1) {
 
-        var newStrength = this.strength - Math.floor(player.defense / 4)
+        var newStrength = this.strength - Math.floor(player.defense / 3)
 
         opponent.hp -= newStrength;
 
