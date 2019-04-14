@@ -12,6 +12,9 @@ var isSelling = false;
 
 var wasAmbushed = false;
 
+var monsters = [];
+var items = [];
+var shopInventory = [];
 
 // console.log("f-" + isFighting + " E-" + isExploring + " t-" + isInTown);
 
@@ -21,7 +24,7 @@ function gameStateCheck() {
         fight();
     } else if (isExploring === true) {
         whereTo();
-    } else if (isInTown === true) {
+    } else if (isInTown === true && isBuying === false && isSelling === false) {
         goToTown();
     } else if (isBuying === true) {
         buy();
@@ -71,8 +74,6 @@ function runLoss() {
 
 
 // create items
-var items = [];
-var items
 //                         name, buyCost, sellCost, effectNum
 var hPot = new CreateItem("Health Potion", 10, 5, 10)
 hPot.effect = function (user) {
@@ -102,6 +103,7 @@ hPot.effect = function (user) {
         gameStateCheck();
     }
 };
+items.push(hPot);
 
 var megaHPot = new CreateItem("Mega Health Potion", 25, 15, 20)
 megaHPot.effect = function (user) {
@@ -131,6 +133,7 @@ megaHPot.effect = function (user) {
         gameStateCheck();
     }
 };
+items.push(megaHPot);
 
 var mPot = new CreateItem("Mana Potion", 10, 5, 8)
 mPot.effect = function (user) {
@@ -159,19 +162,18 @@ mPot.effect = function (user) {
         gameStateCheck();
     }
 }
+items.push(mPot);
 
 var oldHat = new CreateItem("Old Hat", 100, 100, 0);
 oldHat.effect = function () {
     printBox("It looks good on you...")
     gameStateCheck();
 }
+items.push(oldHat);
 
-
-var shopInventory = [hPot.name, mPot.name, oldHat.name, megaHPot.name];
 // create monsters
+var currentEnemy = new CreateMonster("", 0, 0, 0, 0, 0, 0, []);
 
-monsters = []
-var currentEnemy = new CreateMonster("", 0, 0, 0, 0, 0, 0, [])
 //                            name, maxHp, maxMp, strength, speed, xp, gold, invArr
 var slime = new CreateMonster("Slime", 10, 0, 3, 12, 10, 10, [mPot.name]);
 monsters.push(slime);
@@ -600,6 +602,15 @@ function enemyDeathCheck() {
 }
 
 function goToTown() {
+    // give shop random set of items each town visit
+    if (isExploring === true) {
+        shopInventory = [];
+        for (i = 0; i < 5; i++) {
+            var randItem = randNum(0, items.length);
+            shopInventory.push(items[randItem].name);
+
+        }
+    }
 
     isFighting = false;
     isExploring = false;
@@ -607,6 +618,7 @@ function goToTown() {
     isBuying = false;
     isSelling = false;
     // console.log("f-" + isFighting + " e-" + isExploring + " T-" + isInTown);
+
     player.quickCheck();
     inquirer.prompt({
             type: "list",
@@ -706,10 +718,11 @@ function buy() {
 
     isFighting = false;
     isExploring = false;
-    isInTown = false;
+    isInTown = true;
     isBuying = true;
     isSelling = false;
 
+    shopInventory.sort();
     shopInventory.push("< Go Back")
 
     player.quickCheck();
@@ -783,10 +796,11 @@ function sell() {
 
     isFighting = false;
     isExploring = false;
-    isInTown = false;
+    isInTown = true;
     isBuying = false;
     isSelling = true;
 
+    player.inventory.sort();
     player.inventory.push("< Go Back")
 
     player.quickCheck();
@@ -857,7 +871,8 @@ function itemSell(item, cost) {
 
 function useItem() {
 
-    player.inventory.push("< Go Back")
+    player.inventory.sort();
+    player.inventory.push("< Go Back");
 
     player.quickCheck();
     inquirer.prompt({

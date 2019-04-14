@@ -40,6 +40,7 @@ function CreateCharacter(name, race, profession) {
 
     this.checkStats = function () {
 
+        this.inventory.sort();
         console.log("\n");
         console.log(" -- " + this.name + " -- ");
         console.log("lv." + this.level + " " + this.race + " " + this.profession);
