@@ -13,11 +13,11 @@ var isSelling = false;
 var wasAmbushed = false;
 
 var monsters = [];
-var items = [];
+var itemsCommon = [];
+var itemsUncommon = [];
+var itemsRare = [];
 var shopInventory = [];
 var chestInventory = [];
-
-// console.log("f-" + isFighting + " E-" + isExploring + " t-" + isInTown);
 
 function aOrAn(word) {
 
@@ -121,13 +121,13 @@ function runLoss() {
 
 
 
-// create items
+// create itemsCommon
 //                         name, buyCost, sellCost, effectNum
 var hPot = new CreateItem("Health Potion", 10, 5, 10)
 hPot.effect = function (user) {
 
     if (user.hp < user.maxHp) {
-        user.hp += hPot.effectNum
+        user.hp += user.maxHp
         if (user.hp > user.maxHp) {
             user.hp = user.maxHp;
         }
@@ -151,13 +151,13 @@ hPot.effect = function (user) {
         gameStateCheck();
     }
 };
-items.push(hPot);
+itemsCommon.push(hPot);
 
 var megaHPot = new CreateItem("Mega Health Potion", 25, 15, 20)
 megaHPot.effect = function (user) {
 
     if (user.hp < user.maxHp) {
-        user.hp += megaHPot.effectNum
+        user.hp += Math.floor(user.maxHp * .75)
         if (user.hp > user.maxHp) {
             user.hp = user.maxHp;
         }
@@ -181,13 +181,43 @@ megaHPot.effect = function (user) {
         gameStateCheck();
     }
 };
-items.push(megaHPot);
+itemsCommon.push(megaHPot);
+
+var maxHPot = new CreateItem("Max Health Potion", 40, 25, 20)
+maxHPot.effect = function (user) {
+
+    if (user.hp < user.maxHp) {
+        user.hp += Math.floor(user.maxHp * .75)
+        if (user.hp > user.maxHp) {
+            user.hp = user.maxHp;
+        }
+
+        console.log("\n--------");
+        if (user.name === player.name) {
+            console.log("You recovered " + maxHPot.effectNum + " HP")
+        } else {
+            console.log(user.name + " recovered " + maxHPot.effectNum + " HP")
+        }
+
+        removeItem(maxHPot.name, user.inventory);
+
+        if (isFighting === true && user.name === player.name) {
+            currentEnemy.attack(user);
+        }
+        console.log("--------");
+        gameStateCheck();
+    } else {
+        printBox("You are already at full Health.")
+        gameStateCheck();
+    }
+};
+itemsUncommon.push(maxHPot);
 
 var mPot = new CreateItem("Mana Potion", 10, 5, 8)
 mPot.effect = function (user) {
 
     if (user.mp < user.maxMp) {
-        user.mp += mPot.effectNum
+        user.mp += Math.floor(user.maxMp * .5)
         if (user.mp > user.maxMp) {
             user.mp = user.maxMp;
         }
@@ -210,14 +240,72 @@ mPot.effect = function (user) {
         gameStateCheck();
     }
 }
-items.push(mPot);
+itemsCommon.push(mPot);
+
+var megaMPot = new CreateItem("Mega Mana Potion", 25, 15, 8)
+megaMPot.effect = function (user) {
+
+    if (user.mp < user.maxMp) {
+        user.mp += Math.floor(user.maxMp * .75)
+        if (user.mp > user.maxMp) {
+            user.mp = user.maxMp;
+        }
+        console.log("\n--------");
+        if (user.name === user.name) {
+            console.log("You recovered " + megaMPot.effectNum + " MP")
+        } else {
+            console.log(user.name + " recovered " + megaMPot.effectNum + " MP")
+        }
+
+        removeItem(megaMPot.name, user.inventory);
+
+        if (isFighting === true && user.name === player.name) {
+            currentEnemy.attack(player);
+        }
+        console.log("--------");
+        gameStateCheck();
+    } else {
+        printBox("You are already at full Mana.")
+        gameStateCheck();
+    }
+}
+itemsCommon.push(megaMPot);
+
+var maxMPot = new CreateItem("Max Mana Potion", 40, 25, 8)
+maxMPot.effect = function (user) {
+
+    if (user.mp < user.maxMp) {
+        user.mp += user.maxMp
+        if (user.mp > user.maxMp) {
+            user.mp = user.maxMp;
+        }
+        console.log("\n--------");
+        if (user.name === user.name) {
+            console.log("You recovered " + maxMPot.effectNum + " MP")
+        } else {
+            console.log(user.name + " recovered " + maxMPot.effectNum + " MP")
+        }
+
+        removeItem(maxMPot.name, user.inventory);
+
+        if (isFighting === true && user.name === player.name) {
+            currentEnemy.attack(player);
+        }
+        console.log("--------");
+        gameStateCheck();
+    } else {
+        printBox("You are already at full Mana.")
+        gameStateCheck();
+    }
+}
+itemsUncommon.push(maxMPot);
 
 var oldHat = new CreateItem("Old Hat", 100, 100, 0);
 oldHat.effect = function () {
     printBox("It looks good on you...")
     gameStateCheck();
 }
-items.push(oldHat);
+itemsRare.push(oldHat);
 
 // create monsters
 var currentEnemy = new CreateMonster("", 0, 0, 0, 0, 0, 0, []);
@@ -459,9 +547,7 @@ function gameStart() {
 
             }
 
-            // testing area
             player.checkStats();
-
             whereTo();
 
         });
@@ -483,7 +569,7 @@ function whereTo() {
             switch (choice.action) {
 
                 case "Next battle":
-                    var battleCheck = randNum(1, 2)
+                    var battleCheck = randNum(1, 10)
                     if (battleCheck != 1) {
                         monsterEncounter();
                     } else {
@@ -596,8 +682,20 @@ function chestEncounter() {
 
     chestInventory = [];
     for (i = 0; i < 3; i++) {
-        var randItem = randNum(0, items.length);
-        chestInventory.push(items[randItem].name);
+        var randItem = randNum(0, itemsCommon.length);
+        chestInventory.push(itemsCommon[randItem].name);
+
+    }
+
+    for (i = 0; i < 2; i++) {
+        var randItem = randNum(0, itemsUncommon.length);
+        chestInventory.push(itemsUncommon[randItem].name);
+
+    }
+
+    for (i = 0; i < 1; i++) {
+        var randItem = randNum(0, itemsRare.length);
+        chestInventory.push(itemsRare[randItem].name);
 
     }
 
@@ -625,7 +723,7 @@ function chestEncounter() {
 
                         var anA = aOrAn(item)
 
-                        // console.log("You got " + anA + " " + item + ".");
+                        console.log("You got " + anA + " " + item + ".");
 
                     }
 
@@ -718,12 +816,24 @@ function enemyDeathCheck() {
 }
 
 function goToTown() {
-    // give shop random set of items each town visit
+    // give shop random set of itemsCommon each town visit
     if (isExploring === true) {
         shopInventory = [];
-        for (i = 0; i < 5; i++) {
-            var randItem = randNum(0, items.length);
-            shopInventory.push(items[randItem].name);
+        for (i = 0; i < 4; i++) {
+            var randItem = randNum(0, itemsCommon.length);
+            shopInventory.push(itemsCommon[randItem].name);
+
+        }
+
+        for (i = 0; i < 1; i++) {
+            var randItem = randNum(0, itemsUncommon.length);
+            shopInventory.push(itemsUncommon[randItem].name);
+
+        }
+
+        for (i = 0; i < 1; i++) {
+            var randItem = randNum(0, itemsRare.length);
+            shopInventory.push(itemsRare[randItem].name);
 
         }
     }
@@ -855,8 +965,20 @@ function buy() {
                     itemPurchase(megaHPot.name, megaHPot.buyCost);
                     break;
 
+                case maxHPot.name:
+                    itemPurchase(maxHPot.name, maxHPot.buyCost);
+                    break;
+
                 case mPot.name:
-                    itemPurchase(mPot.name, hPot.buyCost)
+                    itemPurchase(mPot.name, mPot.buyCost)
+                    break;
+
+                case megaMPot.name:
+                    itemPurchase(megaMPot.name, megaMPot.buyCost)
+                    break;
+
+                case maxMPot.name:
+                    itemPurchase(maxMPot.name, maxMPot.buyCost)
                     break;
 
                 case oldHat.name:
@@ -930,8 +1052,20 @@ function sell() {
                     itemSell(megaHPot.name, megaHPot.sellCost);
                     break;
 
+                case maxHPot.name:
+                    itemSell(maxHPot.name, maxHPot.sellCost);
+                    break;
+
                 case mPot.name:
                     itemSell(mPot.name, mPot.sellCost)
+                    break;
+
+                case megaMPot.name:
+                    itemSell(megaMPot.name, megaMPot.sellCost)
+                    break;
+
+                case maxMPot.name:
+                    itemSell(maxMPot.name, maxMPot.sellCost)
                     break;
 
                 case oldHat.name:
@@ -1001,8 +1135,20 @@ function useItem() {
                     megaHPot.effect(player);
                     break;
 
+                case maxHPot.name:
+                    maxHPot.effect(player);
+                    break;
+
                 case mPot.name:
                     mPot.effect(player);
+                    break;
+
+                case megaMPot.name:
+                    megaMPot.effect(player);
+                    break;
+
+                case maxMPot.name:
+                    maxMPot.effect(player);
                     break;
 
                 case oldHat.name:
