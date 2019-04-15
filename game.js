@@ -3,8 +3,8 @@ console.log("888888888888888888888888888888888888888888888888888888888")
 console.log("8888888888        888888        888888        88888888888")
 console.log("8888888888  88888  88888  88888  8888  888888888888888888")
 console.log("8888888888        888888        88888  8888    8888888888")
-console.log("8888888888  88   8888888  88888888888  888888  8888888888")
-console.log("8888888888  8888   88888  888888888888        88888888888")
+console.log("8888888888  8   88888888  88888888888  888888  8888888888")
+console.log("8888888888  888   888888  888888888888        88888888888")
 console.log("888888888888888888888888888888888888888888888888888888888")
 console.log("888888888888888888888888888888888888888888888888888888888")
 
@@ -421,12 +421,44 @@ function gameStart() {
                     player.luck += 0
 
                     player.special = {
-                        name: "Berserk",
+                        name: "Axe Strike *",
                         mpCost: 6,
+
+                        move: function (opponent) {
+                            if (player.special.mpCost <= player.mp) {
+                                player.mp -= player.special.mpCost;
+                                var luckCheck = (2 + opponent.speed - player.luck)
+                                var criticalCheck = randNum(1, luckCheck);
+                                var magicStrength = player.strength + Math.floor(player.maxMp / 3)
+
+                                if (criticalCheck != 1) {
+
+                                    opponent.hp -= magicStrength;
+                                    console.log("Your axe hit " + opponent.name + " for " + magicStrength + " damage.")
+                                    console.log(opponent.name + " has " + opponent.hp + " HP left.\n")
+                                    enemyDeathCheck();
+                                } else {
+                                    var newStrength = magicStrength + Math.floor(magicStrength / 2);
+                                    opponent.hp -= newStrength;
+                                    console.log("Critical hit for " + newStrength + " damage!!!");
+                                    console.log(opponent.name + " has " + opponent.hp + " HP left.\n");
+                                    enemyDeathCheck();
+                                }
+                            } else {
+                                console.log("You do not have enough MP to perform this move.");
+                                console.log("--------\n");
+                                gameOverCheck();
+                            }
+                        }
+                    }
+
+                    player.special2 = {
+                        name: "Berserk *",
+                        mpCost: 8,
 
                         move: function () {
 
-                            if (player.special.mpCost <= player.mp) {
+                            if (player.special2.mpCost <= player.mp) {
 
                                 if (player.isBerserk === false) {
 
@@ -434,7 +466,7 @@ function gameStart() {
                                     player.berserkCount = 0
                                     player.berserkAtkHold = player.strength;
 
-                                    player.mp -= player.special.mpCost;
+                                    player.mp -= player.special2.mpCost;
 
                                     var luckCheck = (20 - player.luck)
                                     var criticalCheck = randNum(1, luckCheck);
@@ -475,13 +507,45 @@ function gameStart() {
                     player.luck += 2
 
                     player.special = {
-                        name: "Steal",
+                        name: "Dagger Slash *",
+                        mpCost: 6,
+
+                        move: function (opponent) {
+                            if (player.special.mpCost <= player.mp) {
+                                player.mp -= player.special.mpCost;
+                                var luckCheck = (2 + opponent.speed - player.luck)
+                                var criticalCheck = randNum(1, luckCheck);
+                                var magicStrength = player.strength + Math.floor(player.maxMp / 3)
+
+                                if (criticalCheck != 1) {
+
+                                    opponent.hp -= magicStrength;
+                                    console.log("Your dagger hit " + opponent.name + " for " + magicStrength + " damage.")
+                                    console.log(opponent.name + " has " + opponent.hp + " HP left.\n")
+                                    enemyDeathCheck();
+                                } else {
+                                    var newStrength = magicStrength + Math.floor(magicStrength / 2);
+                                    opponent.hp -= newStrength;
+                                    console.log("Critical hit for " + newStrength + " damage!!!");
+                                    console.log(opponent.name + " has " + opponent.hp + " HP left.\n");
+                                    enemyDeathCheck();
+                                }
+                            } else {
+                                console.log("You do not have enough MP to perform this move.");
+                                console.log("--------\n");
+                                gameOverCheck();
+                            }
+                        }
+                    }
+
+                    player.special2 = {
+                        name: "Steal *",
                         mpCost: 4,
 
                         move: function (opponent) {
                             if (currentEnemy.inventory.length != 0) {
-                                if (player.special.mpCost <= player.mp) {
-                                    player.mp -= player.special.mpCost;
+                                if (player.special2.mpCost <= player.mp) {
+                                    player.mp -= player.special2.mpCost;
                                     var luckCheck = (opponent.speed - player.luck)
                                     var stealCheck = randNum(1, luckCheck);
 
@@ -527,7 +591,7 @@ function gameStart() {
                     player.luck += 1
 
                     player.special = {
-                        name: "Fireball",
+                        name: "Fireball *",
                         mpCost: 6,
 
                         move: function (opponent) {
@@ -555,6 +619,47 @@ function gameStart() {
                                 console.log("--------\n");
                                 gameOverCheck();
                             }
+                        }
+                    }
+
+                    player.special2 = {
+                        name: "Heal *",
+                        mpCost: 10,
+
+                        move: function () {
+
+                            if (player.hp < player.maxHp) {
+                                if (player.special2.mpCost <= player.mp) {
+                                    player.mp -= player.special2.mpCost;
+                                    var luckCheck = (20 - player.luck)
+                                    var criticalCheck = randNum(1, luckCheck);
+                                    var magicStrength = player.maxHp
+
+                                    if (criticalCheck != 1) {
+                                        player.hp += Math.floor(magicStrength * .75);
+                                        if (player.hp > player.maxHp) {
+                                            player.hp = player.maxHp;
+                                        }
+                                        console.log("Your recovered " + magicStrength + " HP.")
+                                        enemyDeathCheck();
+                                    } else {
+                                        player.hp += magicStrength;
+                                        if (player.hp > player.maxHp) {
+                                            player.hp = player.maxHp;
+                                        }
+                                        console.log("Your recovered full health!")
+                                        enemyDeathCheck();
+                                    }
+                                } else {
+                                    console.log("You do not have enough MP to perform this move.");
+                                    console.log("--------\n");
+                                    gameOverCheck();
+                                }
+                            } else {
+                                printBox("You are already at full Health.")
+                                gameStateCheck();
+                            }
+
                         }
                     }
 
@@ -750,7 +855,7 @@ function mimicEncounter() {
     currentEnemy.strength = player.level * 3;
     currentEnemy.xp = player.level * 5 + 5;
     currentEnemy.inventory = Array.from(chestInventory);
-    currentEnemy.gold = 50;
+    currentEnemy.gold = 60;
     currentEnemy.isDead = false;
 
 
@@ -803,6 +908,11 @@ function chestEncounter() {
                     console.log("\n--------")
                     console.log("You opened the chest.\n")
 
+                    var amount = randNum(10, 30);
+                    player.gold += amount;
+                    player.goldCount += amount;
+                    console.log("You got " + amount + " gold.")
+
                     for (i = 0; i < 2; i++) {
                         var itemNum = randNum(0, chestInventory.length)
                         var item = chestInventory[itemNum];
@@ -838,7 +948,7 @@ function fight() {
             type: "list",
             message: "Next move?",
             name: "action",
-            choices: ["Attack", player.special.name, "Use Item", "Check Stats", "< Run"]
+            choices: ["Attack", player.special.name, player.special2.name, "Use Item", "Check Stats", "< Run"]
         })
         .then(function (choice) {
             switch (choice.action) {
@@ -853,10 +963,13 @@ function fight() {
                     player.special.move(currentEnemy);
                     break;
 
+                case player.special2.name:
+                    console.log("\n--------")
+                    player.special2.move(currentEnemy);
+                    break;
+
                 case "Use Item":
-
                     useItem();
-
                     break;
 
                 case "Check Stats":
@@ -966,34 +1079,41 @@ function goToTown() {
 
 
 function stayAtInn() {
-    var cost = 10 + (player.level - 1) * 2;
-    printBox("Staying the night will cost " + cost + " gold.")
+    if (player.hp < player.maxHp || player.mp < player.maxMp) {
+        var cost = 10 + (player.level - 1) * 2;
+        printBox("Staying the night will cost " + cost + " gold.")
 
-    player.quickCheck();
-    inquirer.prompt({
-            type: "confirm",
-            name: "isStaying",
-            message: "Is that okay?",
-            default: true
-        })
-        .then(function (choice) {
-            if (choice.isStaying === true) {
-                if (player.gold >= cost) {
-                    player.gold -= cost;
-                    player.hp = player.maxHp;
-                    player.mp = player.maxMp;
-                    printBox("You feel well rested.")
-                    goToTown();
+        player.quickCheck();
+        inquirer.prompt({
+                type: "confirm",
+                name: "isStaying",
+                message: "Is that okay?",
+                default: true
+            })
+            .then(function (choice) {
+                if (choice.isStaying === true) {
+                    if (player.gold >= cost) {
+                        player.gold -= cost;
+                        player.hp = player.maxHp;
+                        player.mp = player.maxMp;
+                        printBox("You feel well rested.")
+                        goToTown();
+                    } else {
+                        printBox("You cannot afford to stay here.")
+                        goToTown();
+                    }
                 } else {
-                    printBox("You cannot afford to stay here.")
+                    printBox("You left.")
                     goToTown();
-                }
-            } else {
-                printBox("You left.")
-                goToTown();
 
-            }
-        });
+                }
+            });
+    } else {
+        printBox("You are already at full Health and Mana.")
+        gameStateCheck();
+    }
+
+
 }
 
 function shop() {
