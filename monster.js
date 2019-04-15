@@ -1,6 +1,7 @@
 function CreateMonster(name, maxHp, maxMp, strength, speed, xp, gold, invArr) {
 
     this.name = name
+    this.type = "common"
     this.maxHp = maxHp;
     this.hp = maxHp;
     this.maxMp = maxMp;

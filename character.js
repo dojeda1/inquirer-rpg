@@ -53,7 +53,7 @@ function CreateCharacter(name, race, profession) {
 
     this.quickCheck = function () {
         console.log("\n" + this.name + " - " +
-            "HP: " + this.hp + "/" + this.maxHp + " - MP: " + this.mp + "/" + this.maxMp + " - Gold: " + this.gold)
+            "HP: " + this.hp + "/" + this.maxHp + " - MP: " + this.mp + "/" + this.maxMp + " - XP: " + this.xp + "/" + this.nextLevel + " - Gold: " + this.gold)
     }
 
     this.attack = function (opponent) {

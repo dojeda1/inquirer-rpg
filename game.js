@@ -27,6 +27,8 @@ var isSelling = false;
 var isInDungeon = false;
 
 var wasAmbushed = false;
+var dungeonKillCount = 0;
+var dungeonGoal = 0;
 
 var monsters = [];
 var itemsCommon = [];
@@ -107,7 +109,7 @@ function dropLoot() {
     }
 }
 
-function mimicDrop() {
+function bigLootDrop() {
 
     for (i = 0; i < 3; i++) {
 
@@ -764,16 +766,16 @@ function whereTo() {
             type: "list",
             message: "Where to next?",
             name: "action",
-            choices: ["Next battle", "Go to town", "Use Item", "Check Stats", "< Quit"]
+            choices: ["Explore Wild", "Go to town", "Use Item", "Check Stats", "< Quit"]
         })
         .then(function (choice) {
             switch (choice.action) {
 
-                case "Next battle":
+                case "Explore Wild":
                     var battleCheck = randNum(1, 10)
                     if (battleCheck === 1) {
                         chestEncounter();
-                    } else if (battleCheck > 4) {
+                    } else if (battleCheck === 2) {
                         dungeonEncounter();
                     } else {
                         monsterEncounter();
@@ -828,7 +830,11 @@ function whereToDungeon() {
                     if (battleCheck === 1) {
                         chestEncounter();
                     } else {
-                        monsterEncounter();
+                        if (dungeonKillCount < dungeonGoal) {
+                            monsterEncounter();
+                        } else {
+                            bossEncounter();
+                        }
                     }
                     break;
 
@@ -868,6 +874,7 @@ function monsterEncounter() {
     var monNum = randNum(floorNum, rangeNum)
     //  name, maxHp, maxMp, strength, speed, xp, gold, invArr
     currentEnemy.name = monsters[monNum].name;
+    currentEnemy.type = monsters[monNum].type;
     currentEnemy.maxHp = monsters[monNum].maxHp;
     currentEnemy.hp = monsters[monNum].hp;
     currentEnemy.maxMp = monsters[monNum].maxMp;
@@ -904,7 +911,59 @@ function monsterEncounter() {
     } else {
         console.log("You have been ambushed by " + anA + " " + currentEnemy.name + "!!!")
     }
-    console.log("HP: " + currentEnemy.hp + "/" + currentEnemy.maxHp + "  |  MP: " + currentEnemy.mp + "/" + currentEnemy.maxMp + "  |  Strength: " + currentEnemy.strength);
+    console.log("HP: " + currentEnemy.hp + "/" + currentEnemy.maxHp + "  |  MP: " + currentEnemy.mp + "/" + currentEnemy.maxMp + "  |  ATK: " + currentEnemy.strength);
+    console.log("--------")
+    if (isExploring === true) {
+        fight();
+    } else if (isInDungeon === true) {
+        fightDungeon()
+    }
+
+}
+
+function bossEncounter() {
+
+    isFighting = true
+
+    var floorNum = 0;
+    var rangeNum = 0;
+
+    // if (player.level >= 5) {
+    //     floorNum = player.level - 5;
+    //     rangeNum = 5
+    // } else {
+    //     floorNum = 0;
+    //     rangeNum = player.level;
+    // }
+
+    //  name, maxHp, maxMp, strength, speed, xp, gold, invArr
+    currentEnemy.name = "Bob"
+    currentEnemy.title = "the Persistent"
+    currentEnemy.type = "boss"
+    currentEnemy.maxHp = player.level * 6 + 10
+    currentEnemy.hp = player.level * 6 + 10
+    currentEnemy.maxMp = player.level * 6 + 10
+    currentEnemy.mp = player.level * 6 + 10
+    currentEnemy.strength = player.level * 2 + 10
+    currentEnemy.xp = player.level * 5 + 20
+    currentEnemy.gold = 100
+    currentEnemy.isDead = false;
+
+    for (i = 0; i < 2; i++) {
+        var randItem = randNum(0, itemsUncommon.length);
+        currentEnemy.inventory.push(itemsUncommon[randItem].name);
+    }
+
+    for (i = 0; i < 2; i++) {
+        var randItem = randNum(0, itemsRare.length);
+        currentEnemy.inventory.push(itemsRare[randItem].name);
+    }
+
+    console.log("\n--------")
+
+    console.log("You encountered " + currentEnemy.name + ", " + currentEnemy.title + ".")
+
+    console.log("HP: " + currentEnemy.hp + "/" + currentEnemy.maxHp + "  |  MP: " + currentEnemy.mp + "/" + currentEnemy.maxMp + "  |  ATK: " + currentEnemy.strength);
     console.log("--------")
     if (isExploring === true) {
         fight();
@@ -915,9 +974,10 @@ function monsterEncounter() {
 }
 
 function mimicEncounter() {
-    fight = true;
+    isFighting = true;
 
     currentEnemy.name = "Mimic"
+    currentEnemy.type = "Mimic"
     currentEnemy.maxHp = (player.level * 5) + 5;
     currentEnemy.hp = (player.level * 5) + 5;
     currentEnemy.maxMp = 10;
@@ -937,7 +997,11 @@ function mimicEncounter() {
 
     console.log("HP: " + currentEnemy.hp + "/" + currentEnemy.maxHp + "  |  MP: " + currentEnemy.mp + "/" + currentEnemy.maxMp + "  |  Strength: " + currentEnemy.strength);
     console.log("--------")
-    fight();
+    if (isExploring === true) {
+        fight();
+    } else if (isInDungeon === true) {
+        fightDungeon();
+    }
 
 
 }
@@ -1027,7 +1091,8 @@ function dungeonEncounter() {
                 changeState(false, false, false, false, false, true);
 
                 printBox("You stepped into the dungeon.");
-
+                dungeonKillCount = 0;
+                dungeonGoal = 3 + Math.floor(player.level / 3);
                 whereToDungeon();
 
             } else {
@@ -1070,7 +1135,7 @@ function fight() {
 
                 case "Check Stats":
                     player.checkStats();
-                    fight();
+                    gameStateCheck();
                     break;
 
                 case "< Run":
@@ -1118,7 +1183,7 @@ function fightDungeon() {
 
                 case "Check Stats":
                     player.checkStats();
-                    fight();
+                    gameStateCheck();
                     break;
 
                 case "< Escape Dungeon":
@@ -1136,11 +1201,21 @@ function fightDungeon() {
 
 function enemyDeathCheck() {
     if (currentEnemy.hp <= 0) {
-        console.log("You killed " + currentEnemy.name + "!\n");
+
+        if (currentEnemy.type === "boss") {
+            console.log("You killed " + currentEnemy.name + ", " + currentEnemy.title + ".\n");
+            console.log(" - Dungeon Complete - \n")
+        } else if (currentEnemy.type === "common") {
+            console.log("You killed " + currentEnemy.name + "!\n");
+        }
+
         player.killCount++;
+        if (isInDungeon === true) {
+            dungeonKillCount++;
+        }
         dropGold();
-        if (currentEnemy.name === "Mimic") {
-            mimicDrop();
+        if (currentEnemy.type === "Mimic" || currentEnemy.type === "boss") {
+            bigLootDrop();
         } else {
             dropLoot();
         };
@@ -1149,7 +1224,7 @@ function enemyDeathCheck() {
         player.levelUp();
 
         console.log("--------");
-        if (isExploring === true) {
+        if (isExploring === true || dungeonKillCount > dungeonGoal) {
             whereTo();
         } else if (isInDungeon === true) {
             whereToDungeon();
@@ -1522,6 +1597,7 @@ function removeItem(item, array) {
     if (index !== -1) {
         array.splice(index, 1);
     }
+
     // console.log(array);
 }
 
@@ -1539,6 +1615,7 @@ function gameOverCheck() {
         console.log(player.goldCount + " gold earned.\n")
         console.log(" -- GAME OVER -- ");
         console.log("--------")
+
     } else if (isFighting === true && isExploring === true) {
         fight();
     } else if (isExploring === true) {
