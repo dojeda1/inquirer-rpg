@@ -1,3 +1,18 @@
+console.log("888888888888888888888888888888888888888888888888888888888")
+console.log("888888888888888888888888888888888888888888888888888888888")
+console.log("8888888888        888888        888888        88888888888")
+console.log("8888888888  88888  88888  88888  8888  888888888888888888")
+console.log("8888888888        888888        88888  8888    8888888888")
+console.log("8888888888  88   8888888  88888888888  888888  8888888888")
+console.log("8888888888  8888   88888  888888888888        88888888888")
+console.log("888888888888888888888888888888888888888888888888888888888")
+console.log("888888888888888888888888888888888888888888888888888888888")
+
+// cheat checks
+var arg1 = process.argv[2]
+var arg2 = process.argv[3]
+var arg3 = process.argv[4]
+
 var inquirer = require("inquirer");
 var CreateCharacter = require("./character.js");
 var CreateMonster = require("./monster.js");
@@ -127,16 +142,16 @@ var hPot = new CreateItem("Health Potion", 10, 5, 10)
 hPot.effect = function (user) {
 
     if (user.hp < user.maxHp) {
-        user.hp += user.maxHp
+        user.hp += Math.floor(user.maxHp * .5)
         if (user.hp > user.maxHp) {
             user.hp = user.maxHp;
         }
 
         console.log("\n--------");
         if (user.name === player.name) {
-            console.log("You recovered " + hPot.effectNum + " HP")
+            console.log("You recovered " + Math.floor(user.maxHp * .5) + " HP")
         } else {
-            console.log(user.name + " recovered " + hPot.effectNum + " HP")
+            console.log(user.name + " recovered " + Math.floor(user.maxHp * .5) + " HP")
         }
 
         removeItem(hPot.name, user.inventory);
@@ -164,9 +179,9 @@ megaHPot.effect = function (user) {
 
         console.log("\n--------");
         if (user.name === player.name) {
-            console.log("You recovered " + megaHPot.effectNum + " HP")
+            console.log("You recovered " + Math.floor(user.maxHp * .75) + " HP")
         } else {
-            console.log(user.name + " recovered " + megaHPot.effectNum + " HP")
+            console.log(user.name + " recovered " + Math.floor(user.maxHp * .75) + " HP")
         }
 
         removeItem(megaHPot.name, user.inventory);
@@ -187,16 +202,16 @@ var maxHPot = new CreateItem("Max Health Potion", 40, 25, 20)
 maxHPot.effect = function (user) {
 
     if (user.hp < user.maxHp) {
-        user.hp += Math.floor(user.maxHp * .75)
+        user.hp += maxHp
         if (user.hp > user.maxHp) {
             user.hp = user.maxHp;
         }
 
         console.log("\n--------");
         if (user.name === player.name) {
-            console.log("You recovered " + maxHPot.effectNum + " HP")
+            console.log("You recovered " + maxHp + " HP")
         } else {
-            console.log(user.name + " recovered " + maxHPot.effectNum + " HP")
+            console.log(user.name + " recovered " + maxHp + " HP")
         }
 
         removeItem(maxHPot.name, user.inventory);
@@ -223,9 +238,9 @@ mPot.effect = function (user) {
         }
         console.log("\n--------");
         if (user.name === user.name) {
-            console.log("You recovered " + mPot.effectNum + " MP")
+            console.log("You recovered " + Math.floor(user.maxMp * .5) + " MP")
         } else {
-            console.log(user.name + " recovered " + mPot.effectNum + " MP")
+            console.log(user.name + " recovered " + Math.floor(user.maxMp * .5) + " MP")
         }
 
         removeItem(mPot.name, user.inventory);
@@ -252,9 +267,9 @@ megaMPot.effect = function (user) {
         }
         console.log("\n--------");
         if (user.name === user.name) {
-            console.log("You recovered " + megaMPot.effectNum + " MP")
+            console.log("You recovered " + Math.floor(user.maxMp * .75) + " MP")
         } else {
-            console.log(user.name + " recovered " + megaMPot.effectNum + " MP")
+            console.log(user.name + " recovered " + Math.floor(user.maxMp * .75) + " MP")
         }
 
         removeItem(megaMPot.name, user.inventory);
@@ -281,9 +296,9 @@ maxMPot.effect = function (user) {
         }
         console.log("\n--------");
         if (user.name === user.name) {
-            console.log("You recovered " + maxMPot.effectNum + " MP")
+            console.log("You recovered " + user.maxMp + " MP")
         } else {
-            console.log(user.name + " recovered " + maxMPot.effectNum + " MP")
+            console.log(user.name + " recovered " + user.maxMp + " MP")
         }
 
         removeItem(maxMPot.name, user.inventory);
@@ -354,8 +369,6 @@ function gameStart() {
             }
         ])
         .then(function (newPlayer) {
-
-            console.log("Character Created")
 
             player = new CreateCharacter(newPlayer.name, newPlayer.race, newPlayer.profession);
             switch (player.race) {
@@ -547,8 +560,84 @@ function gameStart() {
 
             }
 
+            // add cheats
+            if (arg1 === "bigHealth" || arg2 === "bigHealth" || arg3 === "bigHealth") {
+                player.maxHp += 100;
+                player.hp += 100;
+                console.log("\nbigHealth activated.")
+            }
+
+            if (arg1 === "bigMana" || arg2 === "bigMana" || arg3 === "bigMana") {
+                player.maxMp += 100;
+                player.mp += 100;
+                console.log("\nbigMana activated.")
+            }
+
+            if (arg1 === "bigMoney" || arg2 === "bigMoney" || arg3 === "bigMoney") {
+                player.gold += 250;
+                console.log("\nbigMoney activated.")
+            }
+
+            if (arg1 === "godMode" || arg2 === "godMode" || arg3 === "godMode") {
+                player.maxHp += 1000;
+                player.hp += 1000;
+                player.maxMp += 1000;
+                player.mp += 1000;
+                player.maxGold += 1000;
+
+                console.log("\ngodMode activated.")
+            }
+
+            if (arg1 === "lv") {
+
+                var lvNum = parseInt(arg2)
+                console.log("\nlv" + lvNum + "activated.")
+
+                for (i = 1; i < lvNum; i++) {
+                    player.xp += (player.nextLevel - player.xp);
+                    player.levelUp();
+                }
+            }
+
+            if (arg1 === "item") {
+
+                console.log("\nitem " + arg2 + " activated.")
+                switch (arg2) {
+
+                    case "hPot":
+                        player.inventory.push(hPot.name);
+                        break;
+
+                    case "megaHPot":
+                        player.inventory.push(megaHPot.name);
+                        break;
+
+                    case "maxHPot":
+                        player.inventory.push(maxHPot.name);
+                        break;
+
+                    case "mPot":
+                        player.inventory.push(mPot.name)
+                        break;
+
+                    case "megaMPot":
+                        player.inventory.push(megaMPot.name)
+                        break;
+
+                    case "maxMPot":
+                        player.inventory.push(maxMPot.name)
+                        break;
+
+                    case "oldHat":
+                        player.inventory.push(oldHat.name)
+                        break;
+                }
+
+            }
             player.checkStats();
             whereTo();
+
+
 
         });
 }
@@ -658,7 +747,7 @@ function mimicEncounter() {
     currentEnemy.hp = (player.level * 5) + 5;
     currentEnemy.maxMp = 10;
     currentEnemy.mp = 10;
-    currentEnemy.strength = player.level * 5;
+    currentEnemy.strength = player.level * 3;
     currentEnemy.xp = player.level * 5 + 5;
     currentEnemy.inventory = Array.from(chestInventory);
     currentEnemy.gold = 50;
@@ -816,7 +905,7 @@ function enemyDeathCheck() {
 }
 
 function goToTown() {
-    // give shop random set of itemsCommon each town visit
+    // give shop random set of items each town visit
     if (isExploring === true) {
         shopInventory = [];
         for (i = 0; i < 4; i++) {

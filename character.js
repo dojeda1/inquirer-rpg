@@ -44,9 +44,8 @@ function CreateCharacter(name, race, profession) {
         console.log("\n");
         console.log(" -- " + this.name + " -- ");
         console.log("lv." + this.level + " " + this.race + " " + this.profession);
-        console.log("HP: " + this.hp + "/" + this.maxHp + "  |  MP: " + this.mp + "/" + this.maxMp);
+        console.log("HP: " + this.hp + "/" + this.maxHp + "  |  MP: " + this.mp + "/" + this.maxMp + "  |  XP: " + this.xp + "/" + this.nextLevel);
         console.log("ATK: " + this.strength + "  |  DEF: " + this.defense + "  |  SPD: " + this.speed + "  |  LUCK: " + this.luck);
-        console.log("XP: " + this.xp + " | to next level: " + (this.nextLevel - this.xp));
         console.log("Gold: " + this.gold);
         console.log(" -- Inventory -- ");
         console.log(this.inventory);
