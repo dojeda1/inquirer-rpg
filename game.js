@@ -15,8 +15,22 @@ var wasAmbushed = false;
 var monsters = [];
 var items = [];
 var shopInventory = [];
+var chestInventory = [];
 
 // console.log("f-" + isFighting + " E-" + isExploring + " t-" + isInTown);
+
+function aOrAn(word) {
+
+    var firstLetter = word.charAt(0);
+    var anA = "";
+    if (firstLetter === "A" || firstLetter === "E" || firstLetter === "I" || firstLetter === "O" || firstLetter === "U") {
+        anA = "an";
+        return anA
+    } else {
+        anA = "a";
+        return anA
+    }
+}
 
 function gameStateCheck() {
 
@@ -31,6 +45,14 @@ function gameStateCheck() {
     } else if (isSelling === true) {
         sell();
     }
+}
+
+function changeState(fighting, exploring, inTown, buying, selling) {
+    isFighting = fighting;
+    isExploring = exploring;
+    isInTown = inTown;
+    isBuying = buying;
+    isSelling = selling;
 }
 
 function randNum(x, y) {
@@ -50,14 +72,38 @@ function dropGold() {
     console.log(currentEnemy.name + " dropped " + amount + " gold.")
 }
 
+function dropLoot() {
+    var lootCheck = randNum(1, 5);
+    if (lootCheck === 1) {
+        if (currentEnemy.inventory.length > 0) {
+            var itemNum = randNum(0, currentEnemy.inventory.length);
+            var item = currentEnemy.inventory[itemNum];
+            removeItem(item, currentEnemy.inventory);
+            player.inventory.push(item);
+            var anA = aOrAn(item);
+            console.log(currentEnemy.name + " dropped " + anA + " " + item + ".")
+        }
+    }
+}
+
+function mimicDrop() {
+
+    for (i = 0; i < 3; i++) {
+
+        if (currentEnemy.inventory.length > 0) {
+            var itemNum = randNum(0, currentEnemy.inventory.length);
+            var item = currentEnemy.inventory[itemNum];
+            removeItem(item, currentEnemy.inventory);
+            player.inventory.push(item);
+            var anA = aOrAn(item);
+            console.log(currentEnemy.name + " dropped " + anA + " " + item + ".")
+        }
+    }
+}
+
 function runLoss() {
 
-    isFighting = false;
-    isExploring = true;
-    isInTown = false;
-    isBuying = false;
-    isSelling = false;
-    // console.log("f-" + isFighting + " E-" + isExploring + " t-" + isInTown);
+    changeState(false, true, false, false, false);
 
     var amount = randNum(0, Math.floor(player.gold / 2));
     player.gold -= amount;
@@ -341,14 +387,7 @@ function gameStart() {
                                         var monsterIndex = randNum(0, currentEnemy.inventory.length);
                                         var stealItem = currentEnemy.inventory[monsterIndex];
 
-                                        var firstLetter = stealItem.charAt(0);
-
-                                        var anA = "a";
-                                        if (firstLetter === "A" || firstLetter === "E" || firstLetter === "I" || firstLetter === "O" || firstLetter === "U") {
-                                            anA = "an";
-                                        } else {
-                                            anA = "a";
-                                        }
+                                        var anA = aOrAn(stealItem);
                                         removeItem(stealItem, currentEnemy.inventory);
                                         player.inventory.push(stealItem);
                                         console.log("You stole " + anA + " " + stealItem + "!\n")
@@ -428,14 +467,8 @@ function gameStart() {
 
 function whereTo() {
 
-    isFighting = false;
-    isExploring = true;
-    isInTown = false;
-    isBuying = false;
-    isSelling = false;
-
+    changeState(false, true, false, false, false);
     wasAmbushed = false;
-    // console.log("f-" + isFighting + " E-" + isExploring + " t-" + isInTown);
 
     player.quickCheck();
     inquirer.prompt({
@@ -448,7 +481,12 @@ function whereTo() {
             switch (choice.action) {
 
                 case "Next battle":
-                    monsterEncounter();
+                    var battleCheck = randNum(1, 10)
+                    if (battleCheck != 1) {
+                        monsterEncounter();
+                    } else {
+                        chestEncounter();
+                    }
                     break;
 
                 case "Go to town":
@@ -483,12 +521,7 @@ function whereTo() {
 
 function monsterEncounter() {
 
-    isFighting = true;
-    isExploring = false;
-    isInTown = false;
-    isBuying = false;
-    isSelling = false;
-    // console.log("F-" + isFighting + " e-" + isExploring + " t-" + isInTown);
+    changeState(true, false, false, false, false);
 
     var floorNum = 0;
     var rangeNum = 0;
@@ -515,13 +548,7 @@ function monsterEncounter() {
     currentEnemy.isDead = monsters[monNum].isDead;
 
 
-    var firstLetter = currentEnemy.name.charAt(0);
-    var anA = "a";
-    if (firstLetter === "A" || firstLetter === "E" || firstLetter === "I" || firstLetter === "O" || firstLetter === "U") {
-        anA = "an";
-    } else {
-        anA = "a";
-    }
+    var anA = aOrAn(currentEnemy.name);
 
     console.log("\n--------")
     if (wasAmbushed === false) {
@@ -533,6 +560,103 @@ function monsterEncounter() {
     console.log("--------")
     fight();
 
+}
+
+function mimicEncounter() {
+    changeState(true, false, false, false, false);
+
+    var floorNum = 0;
+    var rangeNum = 0;
+
+    if (player.level >= 5) {
+        floorNum = player.level - 5;
+        rangeNum = 5
+    } else {
+        floorNum = 0;
+        rangeNum = player.level;
+    }
+
+    var monNum = randNum(floorNum, rangeNum)
+    //  name, maxHp, maxMp, strength, speed, xp, gold, invArr
+    currentEnemy.name = "Mimic"
+    currentEnemy.maxHp = (player.level * 5) + 5;
+    currentEnemy.hp = (player.level * 5) + 5;
+    currentEnemy.maxMp = 10;
+    currentEnemy.mp = 10;
+    currentEnemy.strength = player.level * 5;
+    currentEnemy.xp = player.level * 5 + 5;
+    currentEnemy.inventory = Array.from(chestInventory);
+    currentEnemy.gold = 50;
+    currentEnemy.isDead = false;
+
+
+    var anA = aOrAn(currentEnemy.name);
+
+    console.log("\n--------")
+
+    console.log("You were tricked by " + anA + " " + currentEnemy.name + "!")
+
+    console.log("HP: " + currentEnemy.hp + "/" + currentEnemy.maxHp + "  |  MP: " + currentEnemy.mp + "/" + currentEnemy.maxMp + "  |  Strength: " + currentEnemy.strength);
+    console.log("--------")
+    fight();
+
+
+}
+
+function chestEncounter() {
+
+    chestInventory = [];
+    for (i = 0; i < 3; i++) {
+        var randItem = randNum(0, items.length);
+        chestInventory.push(items[randItem].name);
+
+    }
+
+    printBox("You found a chest!")
+
+    player.quickCheck();
+    inquirer.prompt({
+            type: "confirm",
+            message: "Open it?",
+            name: "openChest",
+        })
+        .then(function (choice) {
+            if (choice.openChest === true) {
+                var openCheck = randNum(1, 5)
+                if (openCheck != 1) {
+                    console.log("\n--------")
+                    console.log("You opened the chest.\n")
+
+                    var itemNum = randNum(0, chestInventory.length)
+                    var item = chestInventory[itemNum]
+                    removeItem(item, chestInventory);
+                    player.inventory.push(chestInventory[itemNum]);
+
+                    var anA = aOrAn(item)
+
+                    itemNum = randNum(0, chestInventory.length)
+                    var item2 = chestInventory[itemNum]
+                    removeItem(item2, chestInventory);
+                    player.inventory.push(chestInventory[itemNum]);
+
+                    var anA2 = aOrAn(item2)
+
+                    console.log("It contained " + anA + " " + item + " and " + anA2 + " " + item2 + ".");
+
+                    console.log("--------")
+                    gameStateCheck();
+
+                } else {
+
+                }
+                console.log("It was a trap.")
+                mimicEncounter();
+            } else {
+                printBox("You decided to leave it alone.")
+                gameStateCheck();
+
+            }
+        })
 }
 
 function fight() {
@@ -585,6 +709,12 @@ function enemyDeathCheck() {
         console.log("You killed " + currentEnemy.name + "!\n");
         player.killCount++;
         dropGold();
+        if (currentEnemy.name = "Mimic") {
+            mimicDrop();
+        } else {
+            dropLoot();
+        };
+
         player.gainXp(currentEnemy);
         player.levelUp();
 
@@ -612,12 +742,7 @@ function goToTown() {
         }
     }
 
-    isFighting = false;
-    isExploring = false;
-    isInTown = true;
-    isBuying = false;
-    isSelling = false;
-    // console.log("f-" + isFighting + " e-" + isExploring + " T-" + isInTown);
+    changeState(false, false, true, false, false);
 
     player.quickCheck();
     inquirer.prompt({
@@ -716,14 +841,11 @@ function shop() {
 
 function buy() {
 
-    isFighting = false;
-    isExploring = false;
-    isInTown = true;
-    isBuying = true;
-    isSelling = false;
+    changeState(false, false, true, true, false);
 
     shopInventory.sort();
-    shopInventory.push("< Go Back")
+    shopInventory.push("< Go Back");
+
 
     player.quickCheck();
     inquirer.prompt({
@@ -794,11 +916,7 @@ function itemPurchase(item, cost) {
 
 function sell() {
 
-    isFighting = false;
-    isExploring = false;
-    isInTown = true;
-    isBuying = false;
-    isSelling = true;
+    changeState(false, false, true, false, true);
 
     player.inventory.sort();
     player.inventory.push("< Go Back")
