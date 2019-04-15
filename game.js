@@ -24,6 +24,7 @@ var isExploring = true;
 var isFighting = false;
 var isBuying = false;
 var isSelling = false;
+var isInDungeon = false;
 
 var wasAmbushed = false;
 
@@ -49,7 +50,7 @@ function aOrAn(word) {
 
 function gameStateCheck() {
 
-    if (isFighting === true) {
+    if (isFighting === true && isExploring === true) {
         fight();
     } else if (isExploring === true) {
         whereTo();
@@ -59,15 +60,20 @@ function gameStateCheck() {
         buy();
     } else if (isSelling === true) {
         sell();
+    } else if (isFighting === true && isInDungeon === true) {
+        fightDungeon();
+    } else if (isInDungeon === true) {
+        whereToDungeon();
     }
 }
 
-function changeState(fighting, exploring, inTown, buying, selling) {
+function changeState(fighting, exploring, inTown, buying, selling, dungeon) {
     isFighting = fighting;
     isExploring = exploring;
     isInTown = inTown;
     isBuying = buying;
     isSelling = selling;
+    isInDungeon = dungeon;
 }
 
 function randNum(x, y) {
@@ -120,7 +126,7 @@ function mimicDrop() {
 
 function runLoss() {
 
-    changeState(false, true, false, false, false);
+    changeState(false, true, false, false, false, false);
 
     var amount = randNum(0, Math.floor(player.gold / 2));
     player.gold -= amount;
@@ -202,16 +208,16 @@ var maxHPot = new CreateItem("Max Health Potion", 40, 25, 20)
 maxHPot.effect = function (user) {
 
     if (user.hp < user.maxHp) {
-        user.hp += maxHp
+        user.hp += user.maxHp
         if (user.hp > user.maxHp) {
             user.hp = user.maxHp;
         }
 
         console.log("\n--------");
         if (user.name === player.name) {
-            console.log("You recovered " + maxHp + " HP")
+            console.log("You recovered " + user.maxHp + " HP")
         } else {
-            console.log(user.name + " recovered " + maxHp + " HP")
+            console.log(user.name + " recovered " + user.maxHp + " HP")
         }
 
         removeItem(maxHPot.name, user.inventory);
@@ -458,9 +464,9 @@ function gameStart() {
 
                         move: function () {
 
-                            if (player.special2.mpCost <= player.mp) {
+                            if (player.isBerserk === false) {
 
-                                if (player.isBerserk === false) {
+                                if (player.special2.mpCost <= player.mp) {
 
                                     player.isBerserk = true
                                     player.berserkCount = 0
@@ -483,14 +489,14 @@ function gameStart() {
                                         enemyDeathCheck();
                                     }
                                 } else {
-                                    console.log("You are already Berserk.");
+                                    console.log("You do not have enough MP to perform this move.");
                                     console.log("--------");
-                                    gameOverCheck()
+                                    gameOverCheck();
                                 }
                             } else {
-                                console.log("You do not have enough MP to perform this move.");
+                                console.log("You are already Berserk.");
                                 console.log("--------");
-                                gameOverCheck();
+                                gameOverCheck()
                             }
                         }
                     }
@@ -540,7 +546,7 @@ function gameStart() {
 
                     player.special2 = {
                         name: "Steal *",
-                        mpCost: 4,
+                        mpCost: 5,
 
                         move: function (opponent) {
                             if (currentEnemy.inventory.length != 0) {
@@ -747,9 +753,10 @@ function gameStart() {
         });
 }
 
+
 function whereTo() {
 
-    changeState(false, true, false, false, false);
+    changeState(false, true, false, false, false, false);
     wasAmbushed = false;
 
     player.quickCheck();
@@ -764,10 +771,12 @@ function whereTo() {
 
                 case "Next battle":
                     var battleCheck = randNum(1, 10)
-                    if (battleCheck != 1) {
-                        monsterEncounter();
-                    } else {
+                    if (battleCheck === 1) {
                         chestEncounter();
+                    } else if (battleCheck > 4) {
+                        dungeonEncounter();
+                    } else {
+                        monsterEncounter();
                     }
                     break;
 
@@ -800,10 +809,50 @@ function whereTo() {
         })
 }
 
+function whereToDungeon() {
+
+    changeState(false, false, false, false, false, true);
+
+    player.quickCheck();
+    inquirer.prompt({
+            type: "list",
+            message: "What next?",
+            name: "action",
+            choices: ["Venture Deeper", "Use Item", "Check Stats", "< Leave Dungeon"]
+        })
+        .then(function (choice) {
+            switch (choice.action) {
+
+                case "Venture Deeper":
+                    var battleCheck = randNum(1, 10)
+                    if (battleCheck === 1) {
+                        chestEncounter();
+                    } else {
+                        monsterEncounter();
+                    }
+                    break;
+
+                case "Use Item":
+                    useItem();
+                    break;
+
+                case "Check Stats":
+                    player.checkStats();
+                    whereToDungeon();
+                    break;
+
+                case "< Leave Dungeon":
+                    printBox("You left the dungeon and its loot behind.")
+                    whereTo();
+                    break;
+            }
+        })
+}
+
 
 function monsterEncounter() {
 
-    changeState(true, false, false, false, false);
+    isFighting = true
 
     var floorNum = 0;
     var rangeNum = 0;
@@ -829,6 +878,23 @@ function monsterEncounter() {
     currentEnemy.gold = monsters[monNum].gold;
     currentEnemy.isDead = monsters[monNum].isDead;
 
+    if (isInDungeon === true) {
+        for (i = 0; i < 2; i++) {
+            var randItem = randNum(0, itemsUncommon.length);
+            currentEnemy.inventory.push(itemsUncommon[randItem].name);
+        }
+
+        currentEnemy.name = "Vicious " + currentEnemy.name;
+        currentEnemy.maxHp += 5;
+        currentEnemy.hp += 5;
+        currentEnemy.maxMp += 5;
+        currentEnemy.mp += 5;
+        currentEnemy.strength += 5;
+        currentEnemy.xp += 10;
+        currentEnemy.gold += 30;
+
+    }
+
 
     var anA = aOrAn(currentEnemy.name);
 
@@ -840,12 +906,16 @@ function monsterEncounter() {
     }
     console.log("HP: " + currentEnemy.hp + "/" + currentEnemy.maxHp + "  |  MP: " + currentEnemy.mp + "/" + currentEnemy.maxMp + "  |  Strength: " + currentEnemy.strength);
     console.log("--------")
-    fight();
+    if (isExploring === true) {
+        fight();
+    } else if (isInDungeon === true) {
+        fightDungeon()
+    }
 
 }
 
 function mimicEncounter() {
-    changeState(true, true, false, false, false);
+    fight = true;
 
     currentEnemy.name = "Mimic"
     currentEnemy.maxHp = (player.level * 5) + 5;
@@ -942,6 +1012,32 @@ function chestEncounter() {
         })
 }
 
+function dungeonEncounter() {
+    printBox("You came across an old dungeon.")
+
+    player.quickCheck();
+    inquirer.prompt({
+            type: "confirm",
+            message: "Do you dare to enter?",
+            name: "enterDungeon",
+        })
+        .then(function (choice) {
+            if (choice.enterDungeon === true) {
+
+                changeState(false, false, false, false, false, true);
+
+                printBox("You stepped into the dungeon.");
+
+                whereToDungeon();
+
+            } else {
+                printBox("You decided to move on.")
+                gameStateCheck();
+
+            }
+        })
+}
+
 function fight() {
     player.quickCheck();
     inquirer.prompt({
@@ -990,6 +1086,54 @@ function fight() {
         })
 }
 
+function fightDungeon() {
+    player.quickCheck();
+    inquirer.prompt({
+            type: "list",
+            message: "Next move?",
+            name: "action",
+            choices: ["Attack", player.special.name, player.special2.name, "Use Item", "Check Stats", "< Escape Dungeon"]
+        })
+        .then(function (choice) {
+            switch (choice.action) {
+                case "Attack":
+                    console.log("\n--------")
+                    player.attack(currentEnemy);
+                    enemyDeathCheck();
+                    break;
+
+                case player.special.name:
+                    console.log("\n--------")
+                    player.special.move(currentEnemy);
+                    break;
+
+                case player.special2.name:
+                    console.log("\n--------")
+                    player.special2.move(currentEnemy);
+                    break;
+
+                case "Use Item":
+                    useItem();
+                    break;
+
+                case "Check Stats":
+                    player.checkStats();
+                    fight();
+                    break;
+
+                case "< Escape Dungeon":
+
+                    console.log("\n--------")
+                    console.log("You fled the dungeon.")
+                    runLoss();
+                    console.log("--------")
+                    gameOverCheck();
+
+                    break;
+            }
+        })
+}
+
 function enemyDeathCheck() {
     if (currentEnemy.hp <= 0) {
         console.log("You killed " + currentEnemy.name + "!\n");
@@ -1005,8 +1149,12 @@ function enemyDeathCheck() {
         player.levelUp();
 
         console.log("--------");
+        if (isExploring === true) {
+            whereTo();
+        } else if (isInDungeon === true) {
+            whereToDungeon();
+        }
 
-        whereTo();
 
     } else {
         currentEnemy.attack(player);
@@ -1040,7 +1188,7 @@ function goToTown() {
         }
     }
 
-    changeState(false, false, true, false, false);
+    changeState(false, false, true, false, false, false);
 
     player.quickCheck();
     inquirer.prompt({
@@ -1146,7 +1294,7 @@ function shop() {
 
 function buy() {
 
-    changeState(false, false, true, true, false);
+    changeState(false, false, true, true, false, false);
 
     shopInventory.sort();
     shopInventory.push("< Go Back");
@@ -1233,7 +1381,7 @@ function itemPurchase(item, cost) {
 
 function sell() {
 
-    changeState(false, false, true, false, true);
+    changeState(false, false, true, false, true, false);
 
     player.inventory.sort();
     player.inventory.push("< Go Back")
@@ -1391,10 +1539,16 @@ function gameOverCheck() {
         console.log(player.goldCount + " gold earned.\n")
         console.log(" -- GAME OVER -- ");
         console.log("--------")
-    } else if (isFighting === true) {
+    } else if (isFighting === true && isExploring === true) {
         fight();
     } else if (isExploring === true) {
         whereTo();
+
+    } else if (isFighting === true && isInDungeon === true) {
+        fightDungeon();
+
+    } else if (isInDungeon === true) {
+        whereToDungeon();
     }
 }
 

@@ -103,7 +103,7 @@ function CreateCharacter(name, race, profession) {
                 player.berserkCount = 0;
                 player.isBerserk = false;
                 player.strength = player.berserkAtkHold
-                console.log("> Berserk has run out.")
+                console.log(" - Berserk has run out. - \n")
             }
         }
 
