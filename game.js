@@ -93,10 +93,12 @@ function mimicDrop() {
         if (currentEnemy.inventory.length > 0) {
             var itemNum = randNum(0, currentEnemy.inventory.length);
             var item = currentEnemy.inventory[itemNum];
-            removeItem(item, currentEnemy.inventory);
             player.inventory.push(item);
+            removeItem(item, currentEnemy.inventory);
+
             var anA = aOrAn(item);
             console.log(currentEnemy.name + " dropped " + anA + " " + item + ".")
+            currentEnemy.name
         }
     }
 }
@@ -481,7 +483,7 @@ function whereTo() {
             switch (choice.action) {
 
                 case "Next battle":
-                    var battleCheck = randNum(1, 10)
+                    var battleCheck = randNum(1, 2)
                     if (battleCheck != 1) {
                         monsterEncounter();
                     } else {
@@ -563,21 +565,8 @@ function monsterEncounter() {
 }
 
 function mimicEncounter() {
-    changeState(true, false, false, false, false);
+    changeState(true, true, false, false, false);
 
-    var floorNum = 0;
-    var rangeNum = 0;
-
-    if (player.level >= 5) {
-        floorNum = player.level - 5;
-        rangeNum = 5
-    } else {
-        floorNum = 0;
-        rangeNum = player.level;
-    }
-
-    var monNum = randNum(floorNum, rangeNum)
-    //  name, maxHp, maxMp, strength, speed, xp, gold, invArr
     currentEnemy.name = "Mimic"
     currentEnemy.maxHp = (player.level * 5) + 5;
     currentEnemy.hp = (player.level * 5) + 5;
@@ -593,7 +582,7 @@ function mimicEncounter() {
     var anA = aOrAn(currentEnemy.name);
 
     console.log("\n--------")
-
+    console.log("It was a trap.")
     console.log("You were tricked by " + anA + " " + currentEnemy.name + "!")
 
     console.log("HP: " + currentEnemy.hp + "/" + currentEnemy.maxHp + "  |  MP: " + currentEnemy.mp + "/" + currentEnemy.maxMp + "  |  Strength: " + currentEnemy.strength);
@@ -627,30 +616,27 @@ function chestEncounter() {
                     console.log("\n--------")
                     console.log("You opened the chest.\n")
 
-                    var itemNum = randNum(0, chestInventory.length)
-                    var item = chestInventory[itemNum]
-                    removeItem(item, chestInventory);
-                    player.inventory.push(chestInventory[itemNum]);
+                    for (i = 0; i < 2; i++) {
+                        var itemNum = randNum(0, chestInventory.length)
+                        var item = chestInventory[itemNum];
+                        player.inventory.push(chestInventory[itemNum]);
+                        removeItem(item, chestInventory);
 
-                    var anA = aOrAn(item)
 
-                    itemNum = randNum(0, chestInventory.length)
-                    var item2 = chestInventory[itemNum]
-                    removeItem(item2, chestInventory);
-                    player.inventory.push(chestInventory[itemNum]);
+                        var anA = aOrAn(item)
 
-                    var anA2 = aOrAn(item2)
+                        // console.log("You got " + anA + " " + item + ".");
 
-                    console.log("It contained " + anA + " " + item + " and " + anA2 + " " + item2 + ".");
+                    }
 
                     console.log("--------")
                     gameStateCheck();
 
                 } else {
 
+                    mimicEncounter();
                 }
-                console.log("It was a trap.")
-                mimicEncounter();
+
             } else {
                 printBox("You decided to leave it alone.")
                 gameStateCheck();
@@ -709,7 +695,7 @@ function enemyDeathCheck() {
         console.log("You killed " + currentEnemy.name + "!\n");
         player.killCount++;
         dropGold();
-        if (currentEnemy.name = "Mimic") {
+        if (currentEnemy.name === "Mimic") {
             mimicDrop();
         } else {
             dropLoot();
@@ -959,7 +945,7 @@ function sell() {
 }
 
 function itemSell(item, cost) {
-    console.log(item + " sells for " + cost + " gold.")
+    printBox(item + " sells for " + cost + " gold.")
 
     player.quickCheck();
     inquirer.prompt({
