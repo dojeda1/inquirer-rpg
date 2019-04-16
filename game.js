@@ -25,6 +25,7 @@ var isFighting = false;
 var isBuying = false;
 var isSelling = false;
 var isInDungeon = false;
+var isInTavern = false;
 
 var wasAmbushed = false;
 var dungeonKillCount = 0;
@@ -1008,12 +1009,16 @@ function goToTown() {
             type: "list",
             message: "What next?",
             name: "action",
-            choices: ["Stay at Inn", "Go to Shop", "Use Item", "Check Stats", "< Leave Town"]
+            choices: ["Stay at Inn", "Visit Tavern", "Go to Shop", "Use Item", "Check Stats", "< Leave Town"]
         })
         .then(function (choice) {
             switch (choice.action) {
                 case "Stay at Inn":
                     stayAtInn();
+                    break;
+
+                case "Visit Tavern":
+                    visitTavern();
                     break;
 
                 case "Go to Shop":
@@ -1073,7 +1078,91 @@ function stayAtInn() {
         printBox("You are already at full Health and Mana.")
         gameStateCheck();
     }
+}
 
+function visitTavern() {
+    isInTavern = true;
+
+    player.quickCheck();
+    inquirer.prompt({
+            type: "list",
+            message: "What next?",
+            name: "action",
+            choices: ["Grab a Mead", "Look for Work", "Play Game", "Use Item", "Check Stats", "< Go Back"]
+        })
+        .then(function (choice) {
+            switch (choice.action) {
+                case "Grab a Mead":
+                    drinkMead();
+                    break;
+
+                case "Look for Work":
+                    printBox("Nothing available yet.");
+                    visitTavern();
+                    break;
+
+                case "Play Game":
+                    printBox("Nothing available yet.");
+                    visitTavern();
+                    break;
+
+                case "Use Item":
+                    useItem();
+                    break;
+
+                case "Check Stats":
+                    player.checkStats();
+                    visitTavern();
+                    break;
+
+                case "< Go Back":
+                    goToTown();
+                    break;
+            };
+        })
+}
+
+function drinkMead() {
+
+    var cost = 5
+    printBox("That will be " + cost + " gold.")
+
+    player.quickCheck();
+    inquirer.prompt({
+            type: "confirm",
+            name: "isDrinking",
+            message: "Is that okay?",
+            default: true
+        })
+        .then(function (choice) {
+            if (choice.isDrinking === true) {
+                if (player.gold >= cost) {
+                    player.gold -= cost;
+                    if (player.hp <= player.maxHp) {
+                        player.hp += 5
+                        if (player.hp > player.maxHp) {
+                            player.hp = player.maxHp
+                        }
+                    }
+                    if (player.mp <= player.maxMp) {
+                        player.mp += 3
+                        if (player.mp > player.maxMp) {
+                            player.mp = player.maxMp
+                        }
+                    }
+
+                    printBox("It was very refreshing.")
+                    visitTavern();
+                } else {
+                    printBox("You cannot afford a mead.")
+                    visitTavern();
+                }
+            } else {
+                printBox("You decided you've had enough.")
+                visitTavern();
+
+            }
+        });
 
 }
 
