@@ -157,7 +157,12 @@ hPot.effect = function (user) {
 
         console.log("\n--------");
         if (user.name === player.name) {
-            console.log("You recovered " + Math.floor(user.maxHp * .5) + " HP")
+            if (isFighting === true) {
+                console.log("You recovered " + Math.floor(user.maxHp * .5) + " HP\n")
+            } else {
+                console.log("You recovered " + Math.floor(user.maxHp * .5) + " HP")
+            }
+
         } else {
             console.log(user.name + " recovered " + Math.floor(user.maxHp * .5) + " HP")
         }
@@ -187,7 +192,12 @@ megaHPot.effect = function (user) {
 
         console.log("\n--------");
         if (user.name === player.name) {
-            console.log("You recovered " + Math.floor(user.maxHp * .75) + " HP")
+            if (isFighting === true) {
+                console.log("You recovered " + Math.floor(user.maxHp * .75) + " HP\n")
+            } else {
+                console.log("You recovered " + Math.floor(user.maxHp * .75) + " HP")
+            }
+
         } else {
             console.log(user.name + " recovered " + Math.floor(user.maxHp * .75) + " HP")
         }
@@ -217,7 +227,12 @@ maxHPot.effect = function (user) {
 
         console.log("\n--------");
         if (user.name === player.name) {
-            console.log("You recovered " + user.maxHp + " HP")
+            if (isFighting === true) {
+                console.log("You recovered " + user.maxHp + " HP\n")
+            } else {
+                console.log("You recovered " + user.maxHp + " HP")
+            }
+
         } else {
             console.log(user.name + " recovered " + user.maxHp + " HP")
         }
@@ -245,8 +260,13 @@ mPot.effect = function (user) {
             user.mp = user.maxMp;
         }
         console.log("\n--------");
-        if (user.name === user.name) {
-            console.log("You recovered " + Math.floor(user.maxMp * .5) + " MP")
+        if (user.name === player.name) {
+            if (isFighting === true) {
+                console.log("You recovered " + Math.floor(user.maxMp * .5) + " MP\n")
+            } else {
+                console.log("You recovered " + Math.floor(user.maxMp * .5) + " MP")
+            }
+
         } else {
             console.log(user.name + " recovered " + Math.floor(user.maxMp * .5) + " MP")
         }
@@ -274,8 +294,13 @@ megaMPot.effect = function (user) {
             user.mp = user.maxMp;
         }
         console.log("\n--------");
-        if (user.name === user.name) {
-            console.log("You recovered " + Math.floor(user.maxMp * .75) + " MP")
+        if (user.name === player.name) {
+            if (isFighting === true) {
+                console.log("You recovered " + Math.floor(user.maxMp * .75) + " MP\n")
+            } else {
+                console.log("You recovered " + Math.floor(user.maxMp * .75) + " MP")
+            }
+
         } else {
             console.log(user.name + " recovered " + Math.floor(user.maxMp * .75) + " MP")
         }
@@ -303,8 +328,12 @@ maxMPot.effect = function (user) {
             user.mp = user.maxMp;
         }
         console.log("\n--------");
-        if (user.name === user.name) {
-            console.log("You recovered " + user.maxMp + " MP")
+        if (user.name === player.name) {
+            if (isFighting === true) {
+                console.log("You recovered " + user.maxMp + " MP\n")
+            } else {
+                console.log("You recovered " + user.maxMp + " MP")
+            }
         } else {
             console.log(user.name + " recovered " + user.maxMp + " MP")
         }
@@ -334,21 +363,21 @@ itemsRare.push(oldHat);
 var currentEnemy = new CreateMonster("", 0, 0, 0, 0, 0, 0, []);
 
 //                            name, maxHp, maxMp, strength, speed, xp, gold, invArr
-var slime = new CreateMonster("Slime", 10, 0, 3, 12, 10, 10, [mPot.name]);
+var slime = new CreateMonster("Slime", 20, 0, 5, 12, 10, 10, [mPot.name]);
 monsters.push(slime);
-var wolf = new CreateMonster("Wolf", 12, 0, 6, 15, 12, 12, [mPot.name]);
+var wolf = new CreateMonster("Wolf", 32, 0, 7, 15, 12, 12, [mPot.name]);
 monsters.push(wolf);
-var goblin = new CreateMonster("Goblin", 15, 0, 9, 16, 15, 15, [hPot.name, oldHat.name]);
+var goblin = new CreateMonster("Goblin", 35, 0, 9, 16, 15, 15, [hPot.name, oldHat.name]);
 monsters.push(goblin);
-var orc = new CreateMonster("Orc", 20, 0, 10, 20, 20, 20, [hPot.name]);
+var orc = new CreateMonster("Orc", 40, 0, 10, 20, 20, 20, [hPot.name]);
 monsters.push(orc);
-var ogre = new CreateMonster("Ogre", 25, 0, 15, 15, 25, 25, [megaHPot.name]);
+var ogre = new CreateMonster("Ogre", 45, 0, 15, 15, 25, 25, [megaHPot.name]);
 monsters.push(ogre);
-var giant = new CreateMonster("Giant", 30, 10, 20, 12, 30, 30, [megaHPot.name]);
+var giant = new CreateMonster("Giant", 50, 10, 16, 12, 30, 30, [megaHPot.name]);
 monsters.push(giant);
-var demon = new CreateMonster("Demon", 35, 10, 25, 25, 35, 35, [hPot.name]);
+var demon = new CreateMonster("Demon", 55, 10, 20, 25, 35, 35, [hPot.name]);
 monsters.push(demon);
-var dragon = new CreateMonster("Dragon", 50, 10, 30, 20, 40, 40, [hPot.name, oldHat.name]);
+var dragon = new CreateMonster("Dragon", 70, 10, 25, 20, 40, 40, [hPot.name, oldHat.name]);
 monsters.push(dragon);
 
 // console.log("Monsters Available: " + monsters.length)
@@ -649,7 +678,7 @@ function bossEncounter() {
     currentEnemy.name = "Bob"
     currentEnemy.title = "the Persistent"
     currentEnemy.type = "boss"
-    currentEnemy.maxHp = player.level * 6 + 10
+    currentEnemy.maxHp = player.level * 6 + 20
     currentEnemy.hp = player.level * 6 + 10
     currentEnemy.maxMp = player.level * 6 + 10
     currentEnemy.mp = player.level * 6 + 10
@@ -687,8 +716,8 @@ function mimicEncounter() {
 
     currentEnemy.name = "Mimic"
     currentEnemy.type = "Mimic"
-    currentEnemy.maxHp = (player.level * 5) + 5;
-    currentEnemy.hp = (player.level * 5) + 5;
+    currentEnemy.maxHp = (player.level * 5) + 20;
+    currentEnemy.hp = (player.level * 5) + 20;
     currentEnemy.maxMp = 10;
     currentEnemy.mp = 10;
     currentEnemy.strength = player.level * 3;
