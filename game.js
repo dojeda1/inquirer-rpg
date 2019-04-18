@@ -30,6 +30,7 @@ var isInTavern = false;
 var wasAmbushed = false;
 var dungeonKillCount = 0;
 var dungeonGoal = 0;
+var meadCount = 0;
 
 var monsters = [];
 var itemsCommon = [];
@@ -1002,6 +1003,8 @@ function goToTown() {
         }
     }
 
+    meadCount = 0;
+
     changeState(false, false, true, false, false, false);
 
     player.quickCheck();
@@ -1116,6 +1119,7 @@ function visitTavern() {
                     break;
 
                 case "< Go Back":
+                    isInTavern = false;
                     goToTown();
                     break;
             };
@@ -1150,9 +1154,26 @@ function drinkMead() {
                             player.mp = player.maxMp
                         }
                     }
-
-                    printBox("It was very refreshing.")
-                    visitTavern();
+                    meadCount++;
+                    if (meadCount < 3) {
+                        printBox("It was very refreshing.")
+                        visitTavern();
+                    } else if (meadCount < 4) {
+                        printBox("You are starting to feel drunk...")
+                        visitTavern();
+                    } else if (meadCount < 5) {
+                        printBox("Maaaysssbe wwuuun meerrrrr...")
+                        visitTavern();
+                    } else if (meadCount = 5) {
+                        console.log("\n--------")
+                        console.log("You blacked out from drunkenness.")
+                        console.log("Hours later, you find yourself in the midst of a dungeon, on the brink of death.")
+                        console.log("--------")
+                        isInTavern = false;
+                        player.hp = 1
+                        player.mp = 0
+                        whereToDungeon();
+                    }
                 } else {
                     printBox("You cannot afford a mead.")
                     visitTavern();
