@@ -43,6 +43,7 @@ var chestInventory = [];
 var wordList = ["Goblin", "Dragon", "Elf"];
 var wrongCheck = 0;
 var guessesLeft = 5;
+var lettersGuessed = [];
 
 
 var currentWord = new CreateWord("");
@@ -1234,13 +1235,18 @@ function playingWordGuess() {
 
     guessesLeft = 5;
     wrongCheck = 0;
+    lettersGuessed = [];
+
     for (i = 0; i < currentWord.wordArray.length; i++) {
         if (currentWord.wordArray[i].type = "letter") {
             wrongCheck++;
         }
     }
 
-    console.log(currentWord.displayWord());
+    console.log(" - " + currentWord.displayWord() + " - \n");
+    console.log("Guesses Left: " + guessesLeft + " - Letters Guessed: " + lettersGuessed.join(" "));
+    console.log("--------");
+    player.quickCheck();
 
     guessLetter();
 
@@ -1257,41 +1263,69 @@ function guessLetter() {
         .then(function (choice) {
             var guess = choice.letter.toUpperCase();
             var check = 0;
-            // console.log(guess);
-            // console.log(currentWord.wordArray);
-            // console.log(currentWord.wordArray.length);
-            for (i = 0; i < currentWord.wordArray.length; i++) {
-                if (currentWord.wordArray[i].type = "letter") {
-                    if (guess === currentWord.wordArray[i].value) {
-                        currentWord.wordArray[i].isGuessed = true;
-                        // console.log("YEEEAYYA!!");
-                    } else {
-                        // console.log("Noperino.");
-                        check++;
-                    }
-                }
 
-            }
-            if (check === wrongCheck) {
-                guessesLeft--;
-            }
-            if (guessesLeft === 0) {
-                console.log("you lost!!!")
-                visitTavern();
-            } else {
-                if (currentWord.word === currentWord.displayWord()) {
-                    var gold = 30
-                    player.gold += gold;
-                    console.log(currentWord.displayWord());
-                    printBox("Congratulations! You won " + gold + " gold.");
+            if (lettersGuessed.indexOf(guess) === -1 && currentWord.displayWord().indexOf(guess) === -1) {
+
+                // console.log(guess);
+                // console.log(currentWord.wordArray);
+                // console.log(currentWord.wordArray.length);
+                for (i = 0; i < currentWord.wordArray.length; i++) {
+                    if (currentWord.wordArray[i].type = "letter") {
+                        if (guess === currentWord.wordArray[i].value) {
+                            currentWord.wordArray[i].isGuessed = true;
+                            // console.log("YEEEAYYA!!");
+                        } else {
+                            // console.log("Noperino.");
+                            check++;
+                        }
+                    }
+
+                }
+                if (check === wrongCheck) {
+                    guessesLeft--;
+                    lettersGuessed.push(guess)
+                }
+                if (guessesLeft === 0) {
+                    console.log("\n--------");
+                    console.log("You Lost.\n");
+                    console.log(" - " + currentWord.displayWord() + " - \n");
+                    console.log("Guesses Left: " + guessesLeft + " - Letters Guessed: " + lettersGuessed.join(" "));
+                    console.log("--------");
                     visitTavern();
                 } else {
-
-                    console.log(currentWord.displayWord());
-                    console.log("Guesses Left: " + guessesLeft);
-                    guessLetter();
+                    if (currentWord.word === currentWord.displayWord()) {
+                        var gold = 30
+                        player.gold += gold;
+                        console.log("\n--------");
+                        console.log("Congratulations! You won " + gold + " gold.\n");
+                        console.log(" - " + currentWord.displayWord() + " - \n");
+                        console.log("Guesses Left: " + guessesLeft + " - Letters Guessed: " + lettersGuessed.join(" "));
+                        console.log("--------");
+                        visitTavern();
+                    } else {
+                        console.log("\n--------");
+                        if (check === wrongCheck) {
+                            console.log("There is no '" + guess + "'.\n")
+                        } else {
+                            console.log("Right!\n")
+                        }
+                        console.log(" - " + currentWord.displayWord() + " - \n");
+                        console.log("Guesses Left: " + guessesLeft + " - Letters Guessed: " + lettersGuessed.join(" "));
+                        console.log("--------");
+                        player.quickCheck();
+                        guessLetter();
+                    }
                 }
+            } else {
+                console.log("\n--------");
+                console.log("'" + guess + "' already guessed.\n")
+                console.log(" - " + currentWord.displayWord() + " - \n");
+                console.log("Guesses Left: " + guessesLeft + " - Letters Guessed: " + lettersGuessed.join(" "));
+                console.log("--------");
+                player.quickCheck();
+                guessLetter();
             }
+
 
 
 
