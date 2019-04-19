@@ -40,7 +40,7 @@ var itemsRare = [];
 var shopInventory = [];
 var chestInventory = [];
 
-var wordList = ["Goblin", "Dragon", "Elf"];
+var wordList = ["Goblin", "Ogre", "Orc", "Slime", "Dragon", "Health", "Mana", "Old Hat", "Demon", "Sword", "Shield", "Axe", "Berserk", "Heal", "Steal", "Dagger", "Staff", "Human", "Elf", "Dwarf", "Wolf", "Giant", "Battle", "Fight", "Tavern", "Mead", "Dungeon", "Boss", "Minion", "Rare", "Gold", "Blade", "Forest", "Village", "Town", "Villager", "Adventure", "Explore", "Cave", "Ambush", "Mimic", "Inn", "Dire Wolf", "Monster", "Experience", "Travel", "Potion", "Death", "Item", "Fireball", "Magic", "Warrior", "Thief", "Bandit", "Rogue", "Mage", "Death Scroll", "Game Over", "Vicious", "Recover", "Revive", "Speed", "Strength", "Luck", "Power", "Good", "Evil", "Key", "Bow and Arrow", "Knife", "Rest", "Save", "Quit", "Ghost", "Skeleton", "Boots", "Armor", "Helmet", "Tunic", "Gloves", "Hood", "Kill"];
 var wrongCheck = 0;
 var guessesLeft = 5;
 var lettersGuessed = [];
@@ -1196,7 +1196,7 @@ function drinkMead() {
 }
 
 function wordGuess() {
-    var cost = 10 + (player.level - 1) * 2;
+    var cost = 10;
     printBox("It costs " + cost + " gold to play.")
 
     player.quickCheck();
@@ -1232,13 +1232,14 @@ function playingWordGuess() {
 
     currentWord.word = newWord
     currentWord.createArray(currentWord.word);
+    // console.log(currentWord.wordArray)
 
     guessesLeft = 5;
     wrongCheck = 0;
     lettersGuessed = [];
 
     for (i = 0; i < currentWord.wordArray.length; i++) {
-        if (currentWord.wordArray[i].type = "letter") {
+        if (currentWord.wordArray[i].type === "letter") {
             wrongCheck++;
         }
     }
@@ -1247,7 +1248,8 @@ function playingWordGuess() {
     console.log("Guesses Left: " + guessesLeft + " - Letters Guessed: " + lettersGuessed.join(" "));
     console.log("--------");
     player.quickCheck();
-
+    // console.log(currentWord.wordArray)
+    // console.log(wrongCheck)
     guessLetter();
 
 
@@ -1262,63 +1264,77 @@ function guessLetter() {
         })
         .then(function (choice) {
             var guess = choice.letter.toUpperCase();
+            var letterKeyCode = parseInt(guess.charCodeAt(0));
             var check = 0;
 
-            if (lettersGuessed.indexOf(guess) === -1 && currentWord.displayWord().indexOf(guess) === -1) {
+            if (letterKeyCode >= 65 && letterKeyCode <= 90 && guess.length === 1) {
 
-                // console.log(guess);
-                // console.log(currentWord.wordArray);
-                // console.log(currentWord.wordArray.length);
-                for (i = 0; i < currentWord.wordArray.length; i++) {
-                    if (currentWord.wordArray[i].type = "letter") {
-                        if (guess === currentWord.wordArray[i].value) {
-                            currentWord.wordArray[i].isGuessed = true;
-                            // console.log("YEEEAYYA!!");
-                        } else {
-                            // console.log("Noperino.");
-                            check++;
+                if (lettersGuessed.indexOf(guess) === -1 && currentWord.displayWord().indexOf(guess) === -1) {
+
+                    // console.log(guess);
+                    // console.log(currentWord.wordArray);
+                    // console.log(currentWord.wordArray.length);
+                    for (i = 0; i < currentWord.wordArray.length; i++) {
+                        if (currentWord.wordArray[i].type === "letter") {
+                            if (guess === currentWord.wordArray[i].value) {
+                                currentWord.wordArray[i].isGuessed = true;
+                                // console.log("YEEEAYYA!!");
+                            } else {
+                                // console.log("Noperino.");
+                                check++;
+                                // console.log(check)
+                            }
                         }
-                    }
 
-                }
-                if (check === wrongCheck) {
-                    guessesLeft--;
-                    lettersGuessed.push(guess)
-                }
-                if (guessesLeft === 0) {
-                    console.log("\n--------");
-                    console.log("You Lost.\n");
-                    console.log(" - " + currentWord.displayWord() + " - \n");
-                    console.log("Guesses Left: " + guessesLeft + " - Letters Guessed: " + lettersGuessed.join(" "));
-                    console.log("--------");
-                    visitTavern();
-                } else {
-                    if (currentWord.word === currentWord.displayWord()) {
-                        var gold = 30
-                        player.gold += gold;
+                    }
+                    if (check === wrongCheck) {
+                        guessesLeft--;
+                        lettersGuessed.push(guess)
+                    }
+                    if (guessesLeft === 0) {
                         console.log("\n--------");
-                        console.log("Congratulations! You won " + gold + " gold.\n");
+                        console.log("You Lost.\n");
                         console.log(" - " + currentWord.displayWord() + " - \n");
                         console.log("Guesses Left: " + guessesLeft + " - Letters Guessed: " + lettersGuessed.join(" "));
                         console.log("--------");
                         visitTavern();
                     } else {
-                        console.log("\n--------");
-                        if (check === wrongCheck) {
-                            console.log("There is no '" + guess + "'.\n")
+                        if (currentWord.word === currentWord.displayWord()) {
+                            var gold = 30
+                            player.gold += gold;
+                            console.log("\n--------");
+                            console.log("Congratulations! You won " + gold + " gold.\n");
+                            console.log(" - " + currentWord.displayWord() + " - \n");
+                            console.log("Guesses Left: " + guessesLeft + " - Letters Guessed: " + lettersGuessed.join(" "));
+                            console.log("--------");
+                            visitTavern();
                         } else {
-                            console.log("Right!\n")
+                            console.log("\n--------");
+                            if (check === wrongCheck) {
+                                console.log("There is no '" + guess + "'.\n")
+                            } else {
+                                console.log("Right!\n")
+                            }
+                            console.log(" - " + currentWord.displayWord() + " - \n");
+                            console.log("Guesses Left: " + guessesLeft + " - Letters Guessed: " + lettersGuessed.join(" "));
+                            console.log("--------");
+                            player.quickCheck();
+                            guessLetter();
                         }
-                        console.log(" - " + currentWord.displayWord() + " - \n");
-                        console.log("Guesses Left: " + guessesLeft + " - Letters Guessed: " + lettersGuessed.join(" "));
-                        console.log("--------");
-                        player.quickCheck();
-                        guessLetter();
                     }
+                } else {
+                    console.log("\n--------");
+                    console.log("'" + guess + "' already guessed.\n")
+                    console.log(" - " + currentWord.displayWord() + " - \n");
+                    console.log("Guesses Left: " + guessesLeft + " - Letters Guessed: " + lettersGuessed.join(" "));
+                    console.log("--------");
+                    player.quickCheck();
+                    guessLetter();
                 }
+
             } else {
                 console.log("\n--------");
-                console.log("'" + guess + "' already guessed.\n")
+                console.log("Please choose a single letter.\n")
                 console.log(" - " + currentWord.displayWord() + " - \n");
                 console.log("Guesses Left: " + guessesLeft + " - Letters Guessed: " + lettersGuessed.join(" "));
                 console.log("--------");
