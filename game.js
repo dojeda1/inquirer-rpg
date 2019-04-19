@@ -16,6 +16,7 @@ var arg3 = process.argv[4]
 var inquirer = require("inquirer");
 var CreateCharacter = require("./character.js");
 var CreateMonster = require("./monster.js");
+var CreateBoss = require("./boss.js");
 var CreateItem = require("./items.js")
 var CreateWord = require("./word-guess")
 
@@ -34,6 +35,7 @@ var dungeonGoal = 0;
 var meadCount = 0;
 
 var monsters = [];
+var bosses = [];
 var itemsCommon = [];
 var itemsUncommon = [];
 var itemsRare = [];
@@ -394,6 +396,23 @@ monsters.push(dragon);
 // console.log("Monsters Available: " + monsters.length)
 // console.log(monsters)
 
+// create bosses
+var bob = new CreateBoss("Bob", "the Persistent");
+bosses.push(bob);
+var grue = new CreateBoss("Grue", "the Devourer");
+bosses.push(grue);
+var valadora = new CreateBoss("Valedora", "the Elder Dragon");
+bosses.push(valadora);
+var Brutus = new CreateBoss("Brutus", "Crusher of Skulls");
+bosses.push(Brutus);
+var goblong = new CreateBoss("Goblong", "the Goblin King");
+bosses.push(goblong);
+var celene = new CreateBoss("Celene", "Collector of Lost Souls");
+bosses.push(celene);
+var Rigor = new CreateBoss("Rigor", "the Grand Dire Wolf");
+bosses.push(Rigor);
+//
+
 function gameStart() {
     console.log("\n")
     inquirer
@@ -674,21 +693,12 @@ function bossEncounter() {
 
     isFighting = true
 
-    var floorNum = 0;
-    var rangeNum = 0;
+    var bossIndex = randNum(0, bosses.length)
+    var newBoss = bosses[bossIndex]
 
-    // if (player.level >= 5) {
-    //     floorNum = player.level - 5;
-    //     rangeNum = 5
-    // } else {
-    //     floorNum = 0;
-    //     rangeNum = player.level;
-    // }
-
-    //  name, maxHp, maxMp, strength, speed, xp, gold, invArr
-    currentEnemy.name = "Bob"
-    currentEnemy.title = "the Persistent"
-    currentEnemy.type = "boss"
+    currentEnemy.name = newBoss.name
+    currentEnemy.title = newBoss.title
+    currentEnemy.type = newBoss.type
     currentEnemy.maxHp = player.level * 6 + 20
     currentEnemy.hp = player.level * 6 + 10
     currentEnemy.maxMp = player.level * 6 + 10
@@ -952,8 +962,10 @@ function enemyDeathCheck() {
     if (currentEnemy.hp <= 0) {
 
         if (currentEnemy.type === "boss") {
+            player.dungeonCount++;
             console.log("You killed " + currentEnemy.name + ", " + currentEnemy.title + ".\n");
             console.log(" - Dungeon Complete - \n")
+
         } else if (currentEnemy.type === "common") {
             console.log("You killed " + currentEnemy.name + "!\n");
         }
@@ -1178,6 +1190,8 @@ function drinkMead() {
                         console.log("Hours later, you find yourself in the midst of a dungeon, on the brink of death.")
                         console.log("--------")
                         isInTavern = false;
+                        dungeonKillCount = 0;
+                        dungeonGoal = 3 + Math.floor(player.level / 3);
                         player.hp = 1
                         player.mp = 0
                         whereToDungeon();
@@ -1620,6 +1634,11 @@ function gameOverCheck() {
             console.log(player.killCount + " monsters killed.")
         } else {
             console.log(player.killCount + " monster killed.")
+        }
+        if (player.dungeonCount != 1) {
+            console.log(player.dungeonCount + " dungeons completed.")
+        } else {
+            console.log(player.dungeonCount + " dungeon completed.")
         }
         console.log(player.goldCount + " gold earned.\n")
         console.log(" -- GAME OVER -- ");

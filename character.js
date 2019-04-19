@@ -55,6 +55,7 @@ function CreateCharacter(name, race, profession) {
     this.gold = 0;
     this.goldCount = 0;
     this.killCount = 0;
+    this.dungeonCount = 0;
     this.isDead = false;
     this.isBerserk = false;
     this.berserkCount = 0;
