@@ -17,6 +17,7 @@ var inquirer = require("inquirer");
 var CreateCharacter = require("./character.js");
 var CreateMonster = require("./monster.js");
 var CreateItem = require("./items.js")
+var CreateWord = require("./word-guess")
 
 // gameplay stage variables
 var isInTown = false;
@@ -38,6 +39,13 @@ var itemsUncommon = [];
 var itemsRare = [];
 var shopInventory = [];
 var chestInventory = [];
+
+var wordList = ["Goblin", "Dragon", "Elf"];
+var wrongCheck = 0;
+var guessesLeft = 5;
+
+
+var currentWord = new CreateWord("");
 
 function aOrAn(word) {
 
@@ -1091,7 +1099,7 @@ function visitTavern() {
             type: "list",
             message: "What next?",
             name: "action",
-            choices: ["Grab a Mead", "Look for Work", "Play Game", "Use Item", "Check Stats", "< Go Back"]
+            choices: ["Grab a Mead", "Look for Work", "Word Guess", "Use Item", "Check Stats", "< Go Back"]
         })
         .then(function (choice) {
             switch (choice.action) {
@@ -1104,9 +1112,8 @@ function visitTavern() {
                     visitTavern();
                     break;
 
-                case "Play Game":
-                    printBox("Nothing available yet.");
-                    visitTavern();
+                case "Word Guess":
+                    wordGuess();
                     break;
 
                 case "Use Item":
@@ -1185,6 +1192,110 @@ function drinkMead() {
             }
         });
 
+}
+
+function wordGuess() {
+    var cost = 10 + (player.level - 1) * 2;
+    printBox("It costs " + cost + " gold to play.")
+
+    player.quickCheck();
+    inquirer.prompt({
+            type: "confirm",
+            name: "isPlaying",
+            message: "Is that okay?",
+            default: true
+        })
+        .then(function (choice) {
+            if (choice.isPlaying === true) {
+                if (player.gold >= cost) {
+                    player.gold -= cost;
+                    console.log("\n--------");
+                    console.log("You decided to play.\n")
+                    playingWordGuess();
+                } else {
+                    printBox("You cannot afford to play.")
+                    visitTavern();
+                }
+            } else {
+                printBox("You decided against it.")
+                visitTavern();
+
+            }
+        });
+}
+
+function playingWordGuess() {
+    var randWordNum = randNum(0, wordList.length);
+
+    var newWord = wordList[randWordNum].toUpperCase();
+
+    currentWord.word = newWord
+    currentWord.createArray(currentWord.word);
+
+    guessesLeft = 5;
+    wrongCheck = 0;
+    for (i = 0; i < currentWord.wordArray.length; i++) {
+        if (currentWord.wordArray[i].type = "letter") {
+            wrongCheck++;
+        }
+    }
+
+    console.log(currentWord.displayWord());
+
+    guessLetter();
+
+
+}
+
+function guessLetter() {
+    inquirer
+        .prompt({
+            type: "input",
+            message: "Choose a letter.",
+            name: "letter"
+        })
+        .then(function (choice) {
+            var guess = choice.letter.toUpperCase();
+            var check = 0;
+            // console.log(guess);
+            // console.log(currentWord.wordArray);
+            // console.log(currentWord.wordArray.length);
+            for (i = 0; i < currentWord.wordArray.length; i++) {
+                if (currentWord.wordArray[i].type = "letter") {
+                    if (guess === currentWord.wordArray[i].value) {
+                        currentWord.wordArray[i].isGuessed = true;
+                        // console.log("YEEEAYYA!!");
+                    } else {
+                        // console.log("Noperino.");
+                        check++;
+                    }
+                }
+
+            }
+            if (check === wrongCheck) {
+                guessesLeft--;
+            }
+            if (guessesLeft === 0) {
+                console.log("you lost!!!")
+                visitTavern();
+            } else {
+                if (currentWord.word === currentWord.displayWord()) {
+                    var gold = 30
+                    player.gold += gold;
+                    console.log(currentWord.displayWord());
+                    printBox("Congratulations! You won " + gold + " gold.");
+                    visitTavern();
+                } else {
+
+                    console.log(currentWord.displayWord());
+                    console.log("Guesses Left: " + guessesLeft);
+                    guessLetter();
+                }
+            }
+
+
+
+        })
 }
 
 function shop() {

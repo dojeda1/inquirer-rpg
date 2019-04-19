@@ -1,5 +1,3 @@
-var currentWordArray = [];
-
 function CreateLetter(letter) {
     this.value = letter;
     this.hidden = "*"
@@ -18,73 +16,78 @@ function CreateApostrophe() {
 }
 
 function CreateWord(word) {
-    this.word = word.toUpperCase();
-    this.createArray = function (word) {
-        for (i = 0; i < word.length; i++) {
-            var currentLetter = word.charAt(i);
-            console.log(currentLetter);
-            var letterKeyCode = parseInt(word.charCodeAt(i));
-            console.log(letterKeyCode);
 
-            if (letterKeyCode != 32 && letterKeyCode != 39) {
-                var newLetter = new CreateLetter(currentLetter);
-                currentWordArray.push(newLetter);
-            } else if (letterKeyCode === 32) {
-                var newSpace = new CreateSpace(currentLetter);
-                currentWordArray.push(newSpace);
-            } else {
-                var newApostrophe = new CreateApostrophe(currentLetter);
-                currentWordArray.push(newApostrophe);
-            }
-            console.log(currentWordArray);
-            console.log(currentWord);
+    this.word = word.toUpperCase();
+    this.wordArray = [];
+
+
+}
+
+CreateWord.prototype.createArray = function (word) {
+    this.wordArray = [];
+    for (i = 0; i < word.length; i++) {
+        var currentLetter = word.charAt(i);
+        // console.log(currentLetter);
+        var letterKeyCode = parseInt(word.charCodeAt(i));
+        // console.log(letterKeyCode);
+
+        if (letterKeyCode != 32 && letterKeyCode != 39) {
+            var newLetter = new CreateLetter(currentLetter);
+            this.wordArray.push(newLetter);
+        } else if (letterKeyCode === 32) {
+            var newSpace = new CreateSpace(currentLetter);
+            this.wordArray.push(newSpace);
+        } else {
+            var newApostrophe = new CreateApostrophe(currentLetter);
+            this.wordArray.push(newApostrophe);
         }
+        // console.log(this.wordArray);
+        // console.log(this);
     }
 }
 
-
-
-var currentWord = new CreateWord("goblin's king");
-
-currentWord.createArray(currentWord.word);
-
-function displayWord() {
+CreateWord.prototype.displayWord = function () {
     var show = ""
-    for (i = 0; i < currentWordArray.length; i++) {
-        if (currentWordArray[i].type === "letter") {
-            if (currentWordArray[i].isGuessed === false) {
-                show = show + currentWordArray[i].hidden;
-            } else if (currentWordArray[i].isGuessed === true) {
-                show = show + currentWordArray[i].value;
+    for (i = 0; i < this.wordArray.length; i++) {
+        if (this.wordArray[i].type === "letter") {
+            if (this.wordArray[i].isGuessed === false) {
+                show = show + this.wordArray[i].hidden;
+            } else if (this.wordArray[i].isGuessed === true) {
+                show = show + this.wordArray[i].value;
             }
 
-        } else if (currentWordArray[i].type === "space" || currentWordArray[i].type === "apostrophe") {
-            show = show + currentWordArray[i].value;
+        } else if (this.wordArray[i].type === "space" || this.wordArray[i].type === "apostrophe") {
+            show = show + this.wordArray[i].value;
         }
     }
     return show
 
 }
 
+// varthis = new CreateWord("goblin's king");
 
-console.log(currentWordArray[2].isGuessed)
-currentWordArray[0].isGuessed = true;
-currentWordArray[1].isGuessed = true;
-currentWordArray[2].isGuessed = true;
-currentWordArray[3].isGuessed = false;
-currentWordArray[4].isGuessed = true;
-currentWordArray[5].isGuessed = true;
-currentWordArray[7].isGuessed = true;
-currentWordArray[8].isGuessed = false;
-currentWordArray[9].isGuessed = true;
-currentWordArray[10].isGuessed = true;
-console.log(currentWordArray[2].isGuessed)
-console.log(currentWordArray)
+//this.createArray(this.word);
 
-console.log(displayWord());
-console.log(currentWord.word);
-if (displayWord() === currentWord.word) {
-    console.log("You Win!!")
-} else {
-    console.log("now yet.")
-}
+// console.log(this.wordArray[2].isGuessed)
+//this.wordArray[0].isGuessed = true;
+//this.wordArray[1].isGuessed = true;
+//this.wordArray[2].isGuessed = true;
+//this.wordArray[3].isGuessed = false;
+//this.wordArray[4].isGuessed = true;
+//this.wordArray[5].isGuessed = true;
+//this.wordArray[7].isGuessed = true;
+//this.wordArray[8].isGuessed = false;
+//this.wordArray[9].isGuessed = true;
+//this.wordArray[10].isGuessed = true;
+// console.log(this.wordArray[2].isGuessed)
+// console.log(this.wordArray)
+
+// console.log(this.displayWord());
+// console.log(this.word);
+// if (this.displayWord() ===this.word) {
+//     console.log("You Win!!")
+// } else {
+//     console.log("now yet.")
+// }
+
+module.exports = CreateWord
