@@ -378,19 +378,19 @@ var currentEnemy = new CreateMonster("", 0, 0, 0, 0, 0, 0, []);
 //                            name, maxHp, maxMp, strength, speed, xp, gold, invArr
 var slime = new CreateMonster("Slime", 20, 0, 5, 12, 10, 10, [mPot.name]);
 monsters.push(slime);
-var wolf = new CreateMonster("Wolf", 32, 0, 7, 15, 12, 12, [mPot.name]);
+var wolf = new CreateMonster("Wolf", 32, 0, 7, 15, 12, 12, [hPot.name]);
 monsters.push(wolf);
-var goblin = new CreateMonster("Goblin", 35, 0, 9, 16, 15, 15, [hPot.name, oldHat.name]);
+var goblin = new CreateMonster("Goblin", 35, 0, 9, 16, 15, 15, [hPot.name, mPot.name]);
 monsters.push(goblin);
-var orc = new CreateMonster("Orc", 40, 0, 10, 20, 20, 20, [hPot.name]);
+var orc = new CreateMonster("Orc", 40, 0, 10, 20, 20, 20, [hPot.name, megaHPot.name]);
 monsters.push(orc);
-var ogre = new CreateMonster("Ogre", 45, 0, 15, 15, 25, 25, [megaHPot.name]);
+var ogre = new CreateMonster("Ogre", 45, 0, 15, 15, 25, 25, [megaHPot.name, mPot.name]);
 monsters.push(ogre);
 var giant = new CreateMonster("Giant", 50, 10, 16, 12, 30, 30, [megaHPot.name]);
 monsters.push(giant);
-var demon = new CreateMonster("Demon", 55, 10, 20, 25, 35, 35, [hPot.name]);
+var demon = new CreateMonster("Demon", 55, 10, 20, 25, 35, 35, [megaMPot.name, oldHat.name]);
 monsters.push(demon);
-var dragon = new CreateMonster("Dragon", 70, 10, 25, 20, 40, 40, [hPot.name, oldHat.name]);
+var dragon = new CreateMonster("Dragon", 70, 10, 25, 20, 40, 40, [maxHPot.name, oldHat.name]);
 monsters.push(dragon);
 
 // console.log("Monsters Available: " + monsters.length)
@@ -403,14 +403,20 @@ var grue = new CreateBoss("Grue", "the Devourer");
 bosses.push(grue);
 var valadora = new CreateBoss("Valedora", "the Elder Dragon");
 bosses.push(valadora);
-var Brutus = new CreateBoss("Brutus", "Crusher of Skulls");
-bosses.push(Brutus);
+var brutus = new CreateBoss("Brutus", "Crusher of Skulls");
+bosses.push(brutus);
 var goblong = new CreateBoss("Goblong", "the Goblin King");
 bosses.push(goblong);
 var celene = new CreateBoss("Celene", "Collector of Lost Souls");
 bosses.push(celene);
-var Rigor = new CreateBoss("Rigor", "the Grand Dire Wolf");
-bosses.push(Rigor);
+var rigor = new CreateBoss("Rigor", "the Grand Dire Wolf");
+bosses.push(rigor);
+var lilith = new CreateBoss("Lilith", "Demon of the Black Lake");
+bosses.push(lilith);
+var arealus = new CreateBoss("Arealus", "the White Lion");
+bosses.push(arealus);
+var xerus = new CreateBoss("Xerus", "Mother of Spiders");
+bosses.push(xerus);
 //
 
 function gameStart() {

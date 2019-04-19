@@ -211,7 +211,7 @@ CreateCharacter.prototype.refineCharacter = function (enemyDeathCheck, gameOverC
                         }
                     } else {
                         console.log("You do not have enough MP to perform this move.");
-                        console.log("--------\n");
+                        console.log("--------");
                         gameOverCheck();
                     }
                 }
