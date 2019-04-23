@@ -369,13 +369,13 @@ CreateCharacter.prototype.refineCharacter = function (enemyDeathCheck, gameOverC
 
                             opponent.hp -= magicStrength;
                             console.log("Your flames hit " + opponent.name + " for " + magicStrength + " damage.")
-                            console.log(opponent.name + " has " + opponent.hp + " HP left.")
+                            console.log(opponent.name + " has " + opponent.hp + " HP left.\n")
                             enemyDeathCheck();
                         } else {
                             var newStrength = magicStrength + Math.floor(magicStrength / 2);
                             opponent.hp -= newStrength;
                             console.log("Critical hit for " + newStrength + " damage!!!");
-                            console.log(opponent.name + " has " + opponent.hp + " HP left.");
+                            console.log(opponent.name + " has " + opponent.hp + " HP left.\n");
                             enemyDeathCheck();
                         }
                     } else {

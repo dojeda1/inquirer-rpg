@@ -42,7 +42,7 @@ var itemsRare = [];
 var shopInventory = [];
 var chestInventory = [];
 
-var wordList = ["Goblin", "Ogre", "Orc", "Slime", "Dragon", "Health", "Mana", "Old Hat", "Demon", "Sword", "Shield", "Axe", "Berserk", "Heal", "Steal", "Dagger", "Staff", "Human", "Elf", "Dwarf", "Wolf", "Giant", "Battle", "Fight", "Tavern", "Mead", "Dungeon", "Boss", "Minion", "Rare", "Gold", "Blade", "Forest", "Village", "Town", "Villager", "Adventure", "Explore", "Cave", "Ambush", "Mimic", "Inn", "Dire Wolf", "Monster", "Experience", "Travel", "Potion", "Death", "Item", "Fireball", "Magic", "Warrior", "Thief", "Bandit", "Rogue", "Mage", "Death Scroll", "Game Over", "Vicious", "Recover", "Revive", "Speed", "Strength", "Luck", "Power", "Good", "Evil", "Key", "Bow and Arrow", "Knife", "Rest", "Save", "Quit", "Ghost", "Skeleton", "Boots", "Armor", "Helmet", "Tunic", "Gloves", "Hood", "Kill"];
+var wordList = ["Goblin", "Ogre", "Orc", "Slime", "Dragon", "Health", "Mana", "Old Hat", "Demon", "Sword", "Shield", "Axe", "Berserk", "Heal", "Steal", "Dagger", "Staff", "Human", "Elf", "Dwarf", "Wolf", "Giant", "Battle", "Fight", "Tavern", "Mead", "Dungeon", "Boss", "Minion", "Rare", "Gold", "Blade", "Forest", "Village", "Town", "Villager", "Adventure", "Explore", "Cave", "Ambush", "Mimic", "Inn", "Dire Wolf", "Monster", "Experience", "Travel", "Potion", "Death", "Item", "Fireball", "Magic", "Warrior", "Thief", "Bandit", "Rogue", "Mage", "Death Scroll", "Game Over", "Vicious", "Recover", "Revive", "Speed", "Strength", "Luck", "Power", "Good", "Evil", "Key", "Bow and Arrow", "Knife", "Rest", "Save", "Quit", "Ghost", "Skeleton", "Boots", "Armor", "Helmet", "Tunic", "Gloves", "Hood", "Kill", "Elixir of Life"];
 var wrongCheck = 0;
 var guessesLeft = 5;
 var lettersGuessed = [];
@@ -365,6 +365,50 @@ maxMPot.effect = function (user) {
 }
 itemsUncommon.push(maxMPot);
 
+var lifeElixir = new CreateItem("Elixir of Life", 200, 120, 8)
+lifeElixir.effect = function (user) {
+
+    if (user.hp <= 0) {
+
+        user.hp = user.maxHp
+        user.mp = user.maxMp
+
+        console.log("\n" + this.name + " has revived you!")
+
+        removeItem(lifeElixir.name, user.inventory);
+    } else {
+        printBox("This elixir will revive you when you are about to die.")
+        gameStateCheck();
+    }
+
+}
+itemsRare.push(lifeElixir);
+
+var deathScroll = new CreateItem("Death Scroll", 100, 60, 8)
+deathScroll.effect = function (user, opponent) {
+
+    if (isFighting === true) {
+
+
+        console.log("\n--------");
+
+
+        console.log("You used " + this.name + ".\n")
+
+        opponent.hp = 0;
+
+        removeItem(deathScroll.name, user.inventory);
+
+        enemyDeathCheck();
+
+    } else {
+        printBox("Use this during battle to instantly kill an enemy.")
+        gameStateCheck();
+    }
+
+}
+itemsRare.push(deathScroll);
+
 var oldHat = new CreateItem("Old Hat", 100, 100, 0);
 oldHat.effect = function () {
     printBox("It looks good on you...")
@@ -386,11 +430,13 @@ var orc = new CreateMonster("Orc", 40, 0, 10, 20, 20, 20, [hPot.name, megaHPot.n
 monsters.push(orc);
 var ogre = new CreateMonster("Ogre", 45, 0, 15, 15, 25, 25, [megaHPot.name, mPot.name]);
 monsters.push(ogre);
-var giant = new CreateMonster("Giant", 50, 10, 16, 12, 30, 30, [megaHPot.name]);
+var direWolf = new CreateMonster("Dire Wolf", 50, 0, 17, 15, 25, 25, [hPot.name, mPot.name]);
+monsters.push(direWolf);
+var giant = new CreateMonster("Giant", 50, 10, 20, 12, 30, 30, [megaHPot.name]);
 monsters.push(giant);
-var demon = new CreateMonster("Demon", 55, 10, 20, 25, 35, 35, [megaMPot.name, oldHat.name]);
+var demon = new CreateMonster("Demon", 55, 10, 22, 25, 35, 35, [megaMPot.name, oldHat.name, deathScroll.name]);
 monsters.push(demon);
-var dragon = new CreateMonster("Dragon", 70, 10, 25, 20, 40, 40, [maxHPot.name, oldHat.name]);
+var dragon = new CreateMonster("Dragon", 70, 10, 25, 20, 40, 40, [maxHPot.name, oldHat.name, lifeElixir.name]);
 monsters.push(dragon);
 
 // console.log("Monsters Available: " + monsters.length)
@@ -513,6 +559,14 @@ function gameStart() {
 
                     case "maxMPot":
                         player.inventory.push(maxMPot.name)
+                        break;
+
+                    case "lifeElixir":
+                        player.inventory.push(lifeElixir.name)
+                        break;
+
+                    case "deathScroll":
+                        player.inventory.push(deathScroll.name)
                         break;
 
                     case "oldHat":
@@ -706,9 +760,9 @@ function bossEncounter() {
     currentEnemy.title = newBoss.title
     currentEnemy.type = newBoss.type
     currentEnemy.maxHp = player.level * 6 + 20
-    currentEnemy.hp = player.level * 6 + 10
+    currentEnemy.hp = currentEnemy.maxHp
     currentEnemy.maxMp = player.level * 6 + 10
-    currentEnemy.mp = player.level * 6 + 10
+    currentEnemy.mp = currentEnemy.maxMp
     currentEnemy.strength = player.level * 2 + 10
     currentEnemy.xp = player.level * 5 + 20
     currentEnemy.gold = 100
@@ -1000,6 +1054,12 @@ function enemyDeathCheck() {
 
     } else {
         currentEnemy.attack(player);
+        if (player.hp <= 0 && player.inventory.indexOf(lifeElixir.name) >= 0) {
+
+            lifeElixir.effect(player);
+
+        }
+
         console.log("--------")
 
         gameOverCheck();
@@ -1028,6 +1088,7 @@ function goToTown() {
             shopInventory.push(itemsRare[randItem].name);
 
         }
+
     }
 
     meadCount = 0;
@@ -1322,6 +1383,7 @@ function guessLetter() {
                         if (currentWord.word === currentWord.displayWord()) {
                             var gold = 30
                             player.gold += gold;
+                            player.goldCount += gold;
                             console.log("\n--------");
                             console.log("Congratulations! You won " + gold + " gold.\n");
                             console.log(" - " + currentWord.displayWord() + " - \n");
@@ -1375,7 +1437,7 @@ function shop() {
             type: "list",
             message: "What do you want to do?",
             name: "action",
-            choices: ["Buy", "Sell", "< Go back"]
+            choices: ["Buy", "Sell", "< Go Back"]
         })
         .then(function (choice) {
             switch (choice.action) {
@@ -1387,7 +1449,7 @@ function shop() {
                     sell();
                     break;
 
-                case "< Go back":
+                case "< Go Back":
                     goToTown();
                     break;
 
@@ -1440,6 +1502,14 @@ function buy() {
 
                 case maxMPot.name:
                     itemPurchase(maxMPot.name, maxMPot.buyCost)
+                    break;
+
+                case lifeElixir.name:
+                    itemPurchase(lifeElixir.name, lifeElixir.buyCost)
+                    break;
+
+                case deathScroll.name:
+                    itemPurchase(deathScroll.name, deathScroll.buyCost)
                     break;
 
                 case oldHat.name:
@@ -1529,6 +1599,14 @@ function sell() {
                     itemSell(maxMPot.name, maxMPot.sellCost)
                     break;
 
+                case lifeElixir.name:
+                    itemSell(lifeElixir.name, lifeElixir.sellCost)
+                    break;
+
+                case deathScroll.name:
+                    itemSell(deathScroll.name, deathScroll.sellCost)
+                    break;
+
                 case oldHat.name:
                     itemSell(oldHat.name, oldHat.sellCost)
                     break;
@@ -1612,6 +1690,14 @@ function useItem() {
                     maxMPot.effect(player);
                     break;
 
+                case lifeElixir.name:
+                    lifeElixir.effect(player);
+                    break;
+
+                case deathScroll.name:
+                    deathScroll.effect(player, currentEnemy);
+                    break;
+
                 case oldHat.name:
                     oldHat.effect();
                     break;
@@ -1635,6 +1721,7 @@ function gameOverCheck() {
 
         console.log("\n--------")
         console.log(currentEnemy.name + " has killed you.\n");
+
         console.log(player.name + " reached lv." + player.level + ".");
         if (player.killcount != 1) {
             console.log(player.killCount + " monsters killed.")
@@ -1649,6 +1736,8 @@ function gameOverCheck() {
         console.log(player.goldCount + " gold earned.\n")
         console.log(" -- GAME OVER -- ");
         console.log("--------")
+
+
 
     } else if (isFighting === true && isExploring === true) {
         fight();
