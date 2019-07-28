@@ -6,6 +6,8 @@ A text only, turn-based fantasy RPG that can be played on the console using Node
 
   **View Video Demo [Here!](https://www.youtube.com/watch?v=EQxFZ_BHkuE&feature=youtu.be)**
 
+![Web App Image](./demo.png)
+
 ### Technologies used
 
 * Javascript
